@@ -33,9 +33,9 @@ download_with_checksum \
   "https://cdn.modrinth.com/data/Vebnzrzj/versions/MBSY8toc/LuckPerms-Bukkit-5.5.53.jar" \
   ""
 
-# Chunky
+# Chunky (Hangar)
 download_with_checksum \
-  "https://github.com/pop4959/Chunky/releases/download/v1.4.40/Chunky-Bukkit-1.4.40.jar" \
+  "https://hangar.papermc.io/api/v1/projects/pop4959/Chunky/versions/1.5.3/PAPER/download" \
   ""
 
 # Spark (performance profiler)
