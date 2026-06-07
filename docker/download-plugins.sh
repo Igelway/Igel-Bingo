@@ -33,6 +33,11 @@ download_with_checksum \
   "https://cdn.modrinth.com/data/Vebnzrzj/versions/MBSY8toc/LuckPerms-Bukkit-5.5.53.jar" \
   ""
 
+# PacketEvents (required by BingoReloaded)
+download_with_checksum \
+  "https://github.com/retrooper/packetevents/releases/download/v2.12.2/packetevents-spigot-2.12.2.jar" \
+  ""
+
 # Chunky (Hangar)
 download_with_checksum \
   "https://hangar.papermc.io/api/v1/projects/pop4959/Chunky/versions/1.5.3/PAPER/download" \
