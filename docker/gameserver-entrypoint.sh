@@ -30,6 +30,98 @@ create_symlinks() {
 
 create_symlinks "/opt/app-files/plugins" "/data/plugins"
 
+# === BAC Filter ===
+# Downloads and filters BlazeandCave's Advancements Pack at runtime.
+# BAC is NOT bundled in the image (license compliance).
+# Only advancement files are kept (everything else is removed).
+if [ -x "/opt/app-files/bac-filter.sh" ]; then
+  echo "Running BAC filter to download and install advancements..."
+  /opt/app-files/bac-filter.sh /data/world/datapacks/BAC_Filtered
+fi
+
+# === BingoReloaded Config ===
+# Ensure BingoReloaded has the correct hooks set
+mkdir -p /data/plugins/BingoReloaded
+if [ ! -f "/data/plugins/BingoReloaded/config.yml" ]; then
+  echo "Installing default BingoReloaded config with IgelBingo hooks..."
+  cat > /data/plugins/BingoReloaded/config.yml << 'CONFEOF'
+version: 3.4.2
+configuration: SINGULAR
+defaultWorldName: world
+language: de.yml
+savePlayerStatistics: true
+sendCommandAfterGameEnds: "igelbingo end"
+sendCommandBeforeGameStarts: "igelbingo start"
+playerGamemodeAfterGame: NONE
+voteUsingCommandsOnly: false
+selectTeamsUsingCommandsOnly: false
+disableScoreboardSidebar: false
+useIncludedResourcepack: false
+useMapRenderer: false
+showUniqueAdvancementItems: true
+showUniqueStatisticItems: true
+enableDebugLogging: false
+disableCompanionMod: false
+singlePlayerTeams: false
+minimumPlayerCount: 0
+playerWaitTime: 50
+gameRestartTime: 30
+useVoteSystem: false
+preventPlayerGriefing: false
+startingCountdownTime: 0
+teleportMaxDistance: 0
+playerTeleportStrategy: NONE
+teleportBackAfterDeathMessage: false
+teleportAfterDeathPeriod: 0
+gracePeriod: 30
+removeTaskItems: false
+enableTeamChat: true
+keepScoreboardVisible: true
+showPlayerInScoreboard: true
+disableAdvancements: false
+disableStatistics: false
+endGameWithoutTeams: false
+allowViewingAllCards: true
+savePlayerInformation: false
+loadPlayerInformationStrategy: AFTER_LEAVING_WORLD
+teleportToLobbyAfterGame:
+  enabled: true
+  delay: 10.0
+  spread: 5
+voteList:
+  gamemodes:
+  - lockout
+  - hotswap
+  - complete
+  - regular
+  kits:
+  - hardcore
+  - normal
+  - overpowered
+  - reloaded
+  - custom_1
+  - custom_2
+  - custom_3
+  - custom_4
+  - custom_5
+  cards:
+  - default_card
+  cardsizes:
+  - '3'
+  - '5'
+hotswapMode:
+  minimumExpirationTime: 5
+  maximumExpirationTime: 30
+  recoverTime: 0
+  showExpirationAsDurability: true
+GoUpWand:
+  upDistance: 50
+  downDistance: 25
+  cooldown: 2.0
+  platformLifetime: 10
+CONFEOF
+fi
+
 echo "Starting Minecraft server..."
 
 if [ -n "$PUID" ]; then export UID="$PUID"; fi

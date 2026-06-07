@@ -3,6 +3,7 @@ package de.igelbingo;
 import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -13,7 +14,11 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.io.*;
+import java.nio.file.*;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessageListener {
 
@@ -37,6 +42,8 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
         saveDefaultConfig();
         loadGameConfig();
+
+        extractResourcePack();
 
         getLogger().info("IgelBingo Game Plugin enabled.");
     }
@@ -130,7 +137,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
         world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
         world.setGameRule(GameRule.SEND_COMMAND_FEEDBACK, false);
-        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, true);
+        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
         world.setGameRule(GameRule.DISABLE_ELYTRA_MOVEMENT_CHECK, false);
     }
 
@@ -152,6 +159,9 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         world.setTime(1000);
         world.setStorm(false);
         world.setThundering(false);
+
+        // Silence BAC advancement toasts, sounds, chat and rewards (overwhelming in Bingo)
+        suppressBacNotifications();
 
         // Adventure mode for all players during countdown
         for (Player player : getServer().getOnlinePlayers()) {
@@ -350,7 +360,126 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     }
 
     // =========================================================================
-    //    Plugin Messaging (Velocity Bridge)
+    //    BAC Silencing
+    // =========================================================================
+
+    /**
+     * Disables BAC advancement toasts, sounds, chat announcements and rewards.
+     * With 1000+ advancements, these would be overwhelming during Bingo gameplay.
+     * BAC tracks completions internally — BingoReloaded reads them via the API.
+     */
+    private void suppressBacNotifications() {
+        ConsoleCommandSender console = getServer().getConsoleSender();
+
+        // Disable all advancement type toasts
+        dispatchSilently(console, "function blazeandcave:config/msg_task_off");
+        dispatchSilently(console, "function blazeandcave:config/msg_goal_off");
+        dispatchSilently(console, "function blazeandcave:config/msg_challenge_off");
+        dispatchSilently(console, "function blazeandcave:config/msg_super_challenge_off");
+        dispatchSilently(console, "function blazeandcave:config/msg_milestone_off");
+        dispatchSilently(console, "function blazeandcave:config/msg_set_off");
+        dispatchSilently(console, "function blazeandcave:config/msg_set_server1");
+        dispatchSilently(console, "function blazeandcave:config/msg_set_vanilla_msg");
+
+        // Disable intro welcome message
+        dispatchSilently(console, "function blazeandcave:config/intro_msg_off");
+
+        // Disable trophies, item and XP rewards
+        dispatchSilently(console, "function blazeandcave:config/trophies_off");
+        dispatchSilently(console, "function blazeandcave:config/item_rewards_off");
+        dispatchSilently(console, "function blazeandcave:config/exp_rewards_off");
+
+        getLogger().info("BAC notifications, toasts, sounds and rewards silenced.");
+    }
+
+    private void dispatchSilently(ConsoleCommandSender console, String command) {
+        try {
+            getServer().dispatchCommand(console, command);
+        } catch (Exception e) {
+            getLogger().warning("Failed to run BAC config: " + command + " — " + e.getMessage());
+        }
+    }
+
+    // =========================================================================
+    //    Resource Pack
+    // =========================================================================
+
+    private void extractResourcePack() {
+        Path outputDir = getDataFolder().toPath().resolve("resourcepack");
+        Path outputZip = outputDir.resolve("IgelBingo_Resources.zip");
+
+        if (Files.exists(outputZip)) {
+            getLogger().info("Resource pack already extracted, skipping.");
+            return;
+        }
+
+        try {
+            Files.createDirectories(outputDir);
+            Path sourceDir = extractResourceDir("resourcepack", outputDir.resolve("_tmp"));
+            zipDirectory(sourceDir, outputZip);
+            deleteRecursively(sourceDir);
+            getLogger().info("Resource pack extracted to " + outputZip);
+        } catch (IOException e) {
+            getLogger().severe("Failed to extract resource pack: " + e.getMessage());
+        }
+    }
+
+    private Path extractResourceDir(String resourcePath, Path targetDir) throws IOException {
+        var codeSource = getClass().getProtectionDomain().getCodeSource();
+        if (codeSource == null) throw new IOException("Cannot access JAR");
+
+        try {
+            Path jarPath = Path.of(codeSource.getLocation().toURI());
+            try (FileSystem fs = FileSystems.newFileSystem(jarPath)) {
+                Path sourceDir = fs.getPath(resourcePath);
+                Files.createDirectories(targetDir);
+                try (var stream = Files.walk(sourceDir)) {
+                    stream.forEach(source -> {
+                        Path target = targetDir.resolve(sourceDir.relativize(source).toString());
+                        try {
+                            if (Files.isDirectory(source)) {
+                                Files.createDirectories(target);
+                            } else {
+                                Files.copy(source, target, StandardCopyOption.REPLACE_EXISTING);
+                            }
+                        } catch (IOException ignored) {
+                        }
+                    });
+                }
+            }
+        } catch (Exception e) {
+            throw new IOException("Failed to extract resource directory", e);
+        }
+        return targetDir;
+    }
+
+    private void zipDirectory(Path sourceDir, Path outputZip) throws IOException {
+        try (ZipOutputStream zos = new ZipOutputStream(Files.newOutputStream(outputZip))) {
+            try (var stream = Files.walk(sourceDir)) {
+                stream.filter(Files::isRegularFile).forEach(file -> {
+                    String entryName = sourceDir.relativize(file).toString();
+                    try {
+                        zos.putNextEntry(new ZipEntry(entryName));
+                        Files.copy(file, zos);
+                        zos.closeEntry();
+                    } catch (IOException ignored) {
+                    }
+                });
+            }
+        }
+    }
+
+    private void deleteRecursively(Path path) {
+        try {
+            if (Files.isDirectory(path)) {
+                try (var entries = Files.list(path)) {
+                    entries.forEach(this::deleteRecursively);
+                }
+            }
+            Files.deleteIfExists(path);
+        } catch (IOException ignored) {
+        }
+    }
     // =========================================================================
 
     @Override

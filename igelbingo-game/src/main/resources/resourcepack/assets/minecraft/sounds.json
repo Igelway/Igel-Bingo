@@ -1,0 +1,34 @@
+{
+  "bingo.hype": {
+    "sounds": [
+      "bingo/hype/hype1",
+      "bingo/hype/hype2",
+      "bingo/hype/hype3",
+      "bingo/hype/hype4",
+      "bingo/hype/hype5",
+      "bingo/hype/hype6",
+      "bingo/hype/hype7"
+    ],
+    "stream": true
+  },
+  "bingo.start": {
+    "sounds": ["bingo/start"],
+    "stream": true
+  },
+  "bingo.lobby": {
+    "sounds": [
+      "bingo/lobby/0",
+      "bingo/lobby/1",
+      "bingo/lobby/2",
+      "bingo/lobby/3",
+      "bingo/lobby/4",
+      "bingo/lobby/5",
+      "bingo/lobby/6",
+      "bingo/lobby/7",
+      "bingo/lobby/8",
+      "bingo/lobby/9",
+      "bingo/lobby/10"
+    ],
+    "stream": true
+  }
+}

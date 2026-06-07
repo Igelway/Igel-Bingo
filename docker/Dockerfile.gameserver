@@ -28,6 +28,10 @@ RUN chmod +x /tmp/download-plugins.sh && /tmp/download-plugins.sh /opt/app-files
 # Copy IgelBingo Game Plugin
 COPY igelbingo-game/build/libs/igelbingo-game-*.jar /opt/app-files/plugins/
 
+# Copy BAC filter script (our code, MIT)
+COPY docker/bac-filter.sh /opt/app-files/bac-filter.sh
+RUN chmod +x /opt/app-files/bac-filter.sh
+
 # Copy entrypoint
 COPY docker/gameserver-entrypoint.sh /gameserver-entrypoint.sh
 RUN chmod +x /gameserver-entrypoint.sh
