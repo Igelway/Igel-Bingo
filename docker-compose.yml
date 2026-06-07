@@ -50,7 +50,7 @@ services:
     volumes:
       - ./data/limbo:/data
       - ./docker/nanolimbo-entrypoint.sh:/nanolimbo-entrypoint.sh
-    entrypoint: ["/nanolimbo-entrypoint.sh"]
+    entrypoint: ["sh", "/nanolimbo-entrypoint.sh"]
     networks:
       - igelbingo-network
 
