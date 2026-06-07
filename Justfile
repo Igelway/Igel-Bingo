@@ -47,6 +47,9 @@ docker-build: docker-build-velocity docker-build-gameserver
 
 up _profile="":
     @echo "Starting Igel-Bingo..."
+    @test -f .env || cp .env.example .env
+    @test -f .forwarding.secret || openssl rand -hex 16 > .forwarding.secret
+    @mkdir -p data/velocity data/limbo data/lobby
     @if [ "{{_profile}}" = "playit" ]; then \
         COMPOSE_PROFILES=playit docker compose up -d --remove-orphans; \
     else \
