@@ -1,0 +1,38 @@
+FROM itzg/minecraft-server:latest
+
+ARG PUID=1000
+ARG PGID=1000
+
+ENV TYPE=PURPUR \
+    VERSION=1.21.5 \
+    PURPUR_BUILD=LATEST \
+    ONLINE_MODE=FALSE \
+    DIFFICULTY=easy \
+    SPAWN_PROTECTION=0 \
+    VIEW_DISTANCE=20 \
+    ALLOW_FLIGHT=TRUE
+
+USER root
+
+RUN if getent group minecraft >/dev/null 2>&1; then groupmod -g ${PGID} minecraft || true; \
+    else groupadd -g ${PGID} minecraft || true; fi && \
+    if id -u minecraft >/dev/null 2>&1; then usermod -u ${PUID} -g ${PGID} minecraft || true; \
+    else useradd -u ${PUID} -g ${PGID} -m -s /bin/sh minecraft || true; fi || true
+
+RUN mkdir -p /opt/app-files/plugins && chown -R minecraft:minecraft /opt/app-files || true
+
+# Download plugins
+COPY docker/download-plugins.sh /tmp/download-plugins.sh
+RUN chmod +x /tmp/download-plugins.sh && /tmp/download-plugins.sh /opt/app-files/plugins
+
+# Copy IgelBingo Game Plugin
+COPY igelbingo-game/build/libs/igelbingo-game-*.jar /opt/app-files/plugins/
+
+# Copy entrypoint
+COPY docker/gameserver-entrypoint.sh /gameserver-entrypoint.sh
+RUN chmod +x /gameserver-entrypoint.sh
+
+USER minecraft
+EXPOSE 25565
+
+ENTRYPOINT ["/gameserver-entrypoint.sh"]

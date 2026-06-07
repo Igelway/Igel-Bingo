@@ -1,0 +1,38 @@
+FROM eclipse-temurin:25-jre-jammy
+
+ARG PUID=1000
+ARG PGID=1000
+
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+RUN groupadd -g ${PGID} minecraft || true && \
+    useradd -u ${PUID} -g ${PGID} -m -s /bin/sh minecraft || true
+
+WORKDIR /data
+
+RUN mkdir -p /opt/app-files/plugins
+
+# Download Velocity
+RUN curl -o /opt/app-files/velocity.jar -L \
+    "https://api.papermc.io/v2/projects/velocity/versions/3.4.0-SNAPSHOT/builds/566/downloads/velocity-3.4.0-SNAPSHOT-566.jar"
+
+# Download LuckPerms for Velocity
+RUN curl -o /opt/app-files/plugins/LuckPerms-Velocity.jar -L \
+    "https://download.luckperms.net/1631/velocity/LuckPerms-Velocity-5.5.42.jar"
+
+# Copy IgelBingo Velocity Plugin
+COPY igelbingo-velocity/build/libs/igelbingo-velocity-*.jar /opt/app-files/plugins/
+
+# Copy config templates
+COPY docker/defaults/velocity/ /opt/config-template/
+
+# Copy entrypoint
+COPY docker/velocity-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+RUN chown -R minecraft:minecraft /opt/app-files /opt/config-template /data
+
+ENV IGELBINGO_DOCKER_MODE=true
+EXPOSE 25577
+
+ENTRYPOINT ["/entrypoint.sh"]

@@ -1,0 +1,80 @@
+# Config version. Do not change this
+config-version = "2.7"
+
+# What port should the proxy be bound to?
+bind = "0.0.0.0:25577"
+
+# MOTD displayed in the server list
+motd = "<#09add3>Igel-Bingo Server"
+
+# Maximum players shown in the server list
+show-max-players = 500
+
+# Authenticate players with Mojang
+online-mode = true
+
+# Enforce public key security standard
+force-key-authentication = true
+
+# Prevent client proxy connections
+prevent-client-proxy-connections = false
+
+# Forward IP addresses and other data to backend servers
+player-info-forwarding-mode = "modern"
+
+# Forwarding secret file
+forwarding-secret-file = "/run/secrets/forwarding_secret"
+
+# Announce Forge support
+announce-forge = false
+
+# Kick existing players on duplicate connection
+kick-existing-players = false
+
+# Ping passthrough mode
+ping-passthrough = "DISABLED"
+
+# Enable player address logging
+enable-player-address-logging = true
+
+[servers]
+# Docker Compose service names as addresses
+lobby = "igelbingo-lobby:25565"
+game = "igelbingo-game:25565"
+limbo = "igelbingo-limbo:25565"
+
+# Order to try servers when a player connects
+try = [
+    "limbo"
+]
+
+[forced-hosts]
+"*" = ["limbo"]
+
+[advanced]
+compression-threshold = 256
+compression-level = -1
+login-ratelimit = 3000
+connection-timeout = 5000
+read-timeout = 30000
+haproxy-protocol = false
+tcp-fast-open = false
+bungee-plugin-message-channel = true
+show-ping-requests = false
+failover-on-unexpected-server-disconnect = true
+announce-proxy-commands = true
+log-command-executions = false
+log-player-connections = true
+accepts-transfers = false
+enable-reuse-port = false
+command-rate-limit = 50
+forward-commands-if-rate-limited = true
+kick-after-rate-limited-commands = 0
+tab-complete-rate-limit = 10
+kick-after-rate-limited-tab-completes = 0
+
+[query]
+enabled = false
+port = 25565
+map = "Igel-Bingo"
+show-plugins = false

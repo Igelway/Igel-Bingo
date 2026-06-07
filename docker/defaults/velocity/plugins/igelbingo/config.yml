@@ -1,0 +1,70 @@
+# IgelBingo Velocity Plugin Configuration
+
+# ==========================================================================
+#    Admin
+# ==========================================================================
+# Comma-separated list of Minecraft usernames with admin privileges
+# Can also be set via IGELBINGO_ADMINS environment variable
+admins: []
+
+# ==========================================================================
+#    Game Server
+# ==========================================================================
+# Minecraft version for the game server (passed to itzg as VERSION)
+game-version: "1.21.5"
+
+# Purpur build (LATEST = always newest)
+purpur-build: "LATEST"
+
+# ==========================================================================
+#    Lobby
+# ==========================================================================
+# Auto-start lobby when a player joins the limbo
+lobby-auto-start: true
+
+# Auto-stop lobby when the game starts
+lobby-stop-on-game: true
+
+# Idle time in seconds before lobby stops automatically (0 = disabled)
+lobby-idle-timeout: 300
+
+# ==========================================================================
+#    Chunky
+# ==========================================================================
+# Enable Chunky pre-generation on /ib prepare and /ib start
+chunky-preload: false
+
+# Pre-generation radii (blocks)
+chunky-ow-radius: 5000
+chunky-nether-radius: 2000
+chunky-end-radius: 2000
+
+# ==========================================================================
+#    Docker
+# ==========================================================================
+# Game server memory (e.g. "6G", "4G")
+game-memory: "6G"
+
+# Lobby server memory
+lobby-memory: "2G"
+
+# Pull the game image before starting a new container
+pull-game-image: false
+
+# Docker API base URL (default: unix socket via docker-socket-proxy)
+docker-host: "tcp://docker-proxy:2375"
+
+# ==========================================================================
+#    Game
+# ==========================================================================
+# Comma-separated list of ops for the game server
+game-ops: []
+
+# Whether to start the game in Docker mode (auto-set by environment)
+docker-mode: true
+
+# ==========================================================================
+#    Language
+# ==========================================================================
+# Language file to use (en_us, de_de)
+language: "de_de"

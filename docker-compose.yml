@@ -1,0 +1,102 @@
+services:
+  velocity:
+    image: ${IGELBINGO_VELOCITY_IMAGE:-ghcr.io/igelway/igel-bingo-velocity:latest}
+    pull_policy: ${IGELBINGO_PULL_GAME_IMAGE:-false}
+    restart: unless-stopped
+    ports:
+      - "25565:25577"
+    environment:
+      VELOCITY_ONLINE_MODE: ${VELOCITY_ONLINE_MODE:-true}
+      VELOCITY_FORWARDING_MODE: ${VELOCITY_FORWARDING_MODE:-modern}
+      IGELBINGO_ADMINS: ${IGELBINGO_ADMINS:-}
+      IGELBINGO_GAME_OPS: ${IGELBINGO_GAME_OPS:-}
+      IGELBINGO_GAME_DIFFICULTY: ${IGELBINGO_GAME_DIFFICULTY:-easy}
+      IGELBINGO_GAME_VIEW_DISTANCE: ${IGELBINGO_GAME_VIEW_DISTANCE:-20}
+      IGELBINGO_GAME_MAX_PLAYERS: ${IGELBINGO_GAME_MAX_PLAYERS:--1}
+      IGELBINGO_GAME_MEMORY: ${IGELBINGO_GAME_MEMORY:-6G}
+      IGELBINGO_LOBBY_DIFFICULTY: ${IGELBINGO_LOBBY_DIFFICULTY:-peaceful}
+      IGELBINGO_LOBBY_VIEW_DISTANCE: ${IGELBINGO_LOBBY_VIEW_DISTANCE:-10}
+      IGELBINGO_LOBBY_MEMORY: ${IGELBINGO_LOBBY_MEMORY:-2G}
+      IGELBINGO_LOBBY_AUTO_START: ${IGELBINGO_LOBBY_AUTO_START:-true}
+      IGELBINGO_LOBBY_STOP_ON_GAME: ${IGELBINGO_LOBBY_STOP_ON_GAME:-true}
+      IGELBINGO_LOBBY_IDLE_TIMEOUT: ${IGELBINGO_LOBBY_IDLE_TIMEOUT:-300}
+      IGELBINGO_CHUNKY_PRELOAD: ${IGELBINGO_CHUNKY_PRELOAD:-false}
+      IGELBINGO_CHUNKY_OW_RADIUS: ${IGELBINGO_CHUNKY_OW_RADIUS:-5000}
+      IGELBINGO_CHUNKY_NETHER_RADIUS: ${IGELBINGO_CHUNKY_NETHER_RADIUS:-2000}
+      IGELBINGO_CHUNKY_END_RADIUS: ${IGELBINGO_CHUNKY_END_RADIUS:-2000}
+      IGELBINGO_PULL_GAME_IMAGE: ${IGELBINGO_PULL_GAME_IMAGE:-false}
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      GAME_DATA_DIR: ${GAME_DATA_DIR:-./data}
+    secrets:
+      - forwarding_secret
+    volumes:
+      - ./data/velocity:/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - igelbingo-network
+    depends_on:
+      - limbo
+
+  limbo:
+    image: itzg/minecraft-server:latest
+    restart: unless-stopped
+    environment:
+      TYPE: NANOLIMBO
+      EULA: "TRUE"
+      ONLINE_MODE: "FALSE"
+      MEMORY: "300M"
+    secrets:
+      - forwarding_secret
+    volumes:
+      - ./data/limbo:/data
+      - ./docker/nanolimbo-entrypoint.sh:/nanolimbo-entrypoint.sh
+    entrypoint: ["/nanolimbo-entrypoint.sh"]
+    networks:
+      - igelbingo-network
+
+  lobby:
+    image: ${IGELBINGO_GAMESERVER_IMAGE:-ghcr.io/igelway/igel-bingo-gameserver:latest}
+    restart: "no"
+    environment:
+      TYPE: PURPUR
+      VERSION: "1.21.5"
+      PURPUR_BUILD: LATEST
+      EULA: ${MINECRAFT_SERVER_EULA:-true}
+      ONLINE_MODE: "FALSE"
+      DIFFICULTY: ${IGELBINGO_LOBBY_DIFFICULTY:-peaceful}
+      VIEW_DISTANCE: ${IGELBINGO_LOBBY_VIEW_DISTANCE:-10}
+      MEMORY: ${IGELBINGO_LOBBY_MEMORY:-2G}
+      SPAWN_PROTECTION: "0"
+      ALLOW_FLIGHT: "TRUE"
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+    secrets:
+      - forwarding_secret
+    volumes:
+      - ./data/lobby:/data
+    ports: []
+    networks:
+      - igelbingo-network
+
+  playit:
+    image: ghcr.io/playit-cloud/playit-agent:latest
+    restart: unless-stopped
+    profiles: ["playit"]
+    network_mode: host
+    environment:
+      SECRET_KEY: ${PLAYIT_SECRET_KEY:-}
+    secrets:
+      - playit_secret
+    volumes:
+      - ./data/playit:/data
+
+networks:
+  igelbingo-network:
+    driver: bridge
+
+secrets:
+  forwarding_secret:
+    file: ./.forwarding.secret
+  playit_secret:
+    file: ./.playit.secret

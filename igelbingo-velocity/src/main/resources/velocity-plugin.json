@@ -1,0 +1,8 @@
+{
+  "id": "igelbingo",
+  "name": "IgelBingo",
+  "version": "1.0.0",
+  "description": "Velocity plugin for Igel-Bingo game management",
+  "authors": ["Igelway"],
+  "main": "de.igelbingo.IgelBingoPlugin"
+}

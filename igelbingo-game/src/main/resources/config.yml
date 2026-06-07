@@ -1,0 +1,14 @@
+# IgelBingo Game Plugin Configuration
+# ==========================================================================
+
+# Countdown duration in seconds before game starts
+countdown-seconds: 30
+
+# Worldborder sizes
+worldborder-overworld: 10000
+worldborder-nether: 4000
+worldborder-end: 8000
+
+# Elytra and firework replenish settings
+elytra-replenish-interval: 30  # seconds between firework replenish
+elytra-replenish-amount: 3     # fireworks given per replenish

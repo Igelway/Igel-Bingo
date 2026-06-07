@@ -1,0 +1,40 @@
+# ==========================================================================
+#    English (en_us) Language File for IgelBingo Velocity Plugin
+# ==========================================================================
+
+prefix: "&7[&6Igel-Bingo&7]&r"
+no-permission: "&cNo permission."
+player-not-found: "&cPlayer not found."
+invalid-argument: "&cInvalid argument."
+
+game:
+  starting: "&aStarting Bingo server..."
+  starting-pregen: "&aStarting Bingo server with Chunky pre-generation..."
+  started: "&aGame started! Server is ready."
+  already-running: "&cA game is already running."
+  not-running: "&cNo game is running."
+  stopping: "&eStopping game..."
+  stopped: "&aGame stopped. Cleaning up servers."
+  state: "&eStatus: {state}"
+  server-ready: "&aBingo server ready in {time} seconds."
+
+prepare:
+  starting: "&aPreparing Bingo server with Chunky pre-generation..."
+  chunky-running: "&eChunky running... Progress: {progress}%"
+  chunky-done: "&aChunky pre-generation complete! Server is ready."
+
+seed:
+  set: "&aSeed set: {seed}"
+  cleared: "&aSeed cleared (random seed on next start)."
+  current: "&eCurrent seed: {seed}"
+  none: "&eNo seed set."
+
+cleanup:
+  confirming: "&eStarting cleanup..."
+  done: "&aAll game containers and data have been deleted."
+
+lobby:
+  starting: "&eStarting lobby, please wait..."
+  started: "&aLobby is ready. Connecting you..."
+  stopping: "&eShutting down lobby..."
+  stopped: "&aLobby stopped (inactivity)."

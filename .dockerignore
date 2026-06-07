@@ -1,0 +1,10 @@
+**/target/**
+**/build/**
+**/.gradle/**
+**/node_modules/**
+.git/
+data/
+.env
+*.env.local
+.forwarding.secret
+.playit.secret

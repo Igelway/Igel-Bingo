@@ -1,0 +1,46 @@
+#!/bin/bash
+set -e
+
+TARGET_DIR="$1"
+mkdir -p "$TARGET_DIR"
+
+download_with_checksum() {
+  local url="$1"
+  local sha256="$2"
+  local filename=$(basename "${url%%\?*}")
+
+  echo "Downloading $filename..."
+  curl -fSL -o "$TARGET_DIR/$filename" "$url"
+
+  if [ -n "$sha256" ]; then
+    echo "Verifying $filename..."
+    echo "$sha256  $TARGET_DIR/$filename" | sha256sum -c -
+  fi
+}
+
+# BingoReloaded (Paper) - v3.4.2
+download_with_checksum \
+  "https://github.com/Steaf23/BingoReloaded/releases/download/v3.4.2/BingoReloaded-paper-3.4.2.jar" \
+  ""
+
+# PlaceholderAPI
+download_with_checksum \
+  "https://github.com/PlaceholderAPI/PlaceholderAPI/releases/download/2.12.2/PlaceholderAPI-2.12.2.jar" \
+  ""
+
+# LuckPerms for Bukkit
+download_with_checksum \
+  "https://download.luckperms.net/1631/bukkit/loader/LuckPerms-Bukkit-5.5.42.jar" \
+  ""
+
+# Chunky
+download_with_checksum \
+  "https://github.com/pop4959/Chunky/releases/download/v1.4.40/Chunky-Bukkit-1.4.40.jar" \
+  ""
+
+# Spark (performance profiler)
+download_with_checksum \
+  "https://github.com/lucko/spark/releases/download/1.10.141/spark-bukkit-1.10.141.jar" \
+  ""
+
+echo "All plugins downloaded."

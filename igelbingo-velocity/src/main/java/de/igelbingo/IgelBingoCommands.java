@@ -1,0 +1,248 @@
+package de.igelbingo;
+
+import com.velocitypowered.api.command.SimpleCommand;
+import com.velocitypowered.api.proxy.ProxyServer;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+public final class IgelBingoCommands implements SimpleCommand {
+
+    private final IgelBingoPlugin plugin;
+    private final PluginConfig config;
+    private final ProxyServer proxy;
+    private final DockerServerManager docker;
+    private final VelocityLang lang;
+
+    public IgelBingoCommands(IgelBingoPlugin plugin) {
+        this.plugin = plugin;
+        this.config = plugin.getConfig();
+        this.proxy = plugin.getProxy();
+        this.docker = plugin.getDockerManager();
+        this.lang = plugin.getLang();
+    }
+
+    @Override
+    public void execute(Invocation invocation) {
+        String[] args = invocation.arguments();
+        var source = invocation.source();
+
+        if (args.length == 0) {
+            source.sendMessage(deserialize(lang.prefixed("invalid-argument")));
+            return;
+        }
+
+        if (!hasPermission(source)) {
+            source.sendMessage(deserialize(lang.prefixed("no-permission")));
+            return;
+        }
+
+        switch (args[0].toLowerCase()) {
+            case "start" -> handleStart(args);
+            case "prepare" -> handlePrepare(args);
+            case "stop" -> handleStop();
+            case "seed" -> handleSeed(args);
+            case "state" -> handleState();
+            case "cleanup" -> handleCleanup();
+            default -> source.sendMessage(deserialize(lang.prefixed("invalid-argument")));
+        }
+    }
+
+    private void handleStart(String[] args) {
+        if (plugin.getState() != GameState.IDLE) {
+            broadcast(lang.prefixed("game.already-running"));
+            return;
+        }
+
+        boolean clean = args.length > 1 && "--clean".equals(args[1]);
+
+        plugin.setState(GameState.STARTING);
+        broadcast(lang.prefixed("game.starting"));
+
+        if (clean) {
+            docker.cleanupGameData();
+        }
+
+        boolean withChunky = config.chunkyPreload && !clean;
+
+        if (config.lobbyStopOnGame) {
+            docker.stopLobby();
+        }
+
+        docker.createGameServer(withChunky);
+
+        docker.waitForServerReady().thenAccept(ready -> {
+            if (!ready) {
+                broadcast(lang.prefixed("game.started"));
+                plugin.setState(GameState.IDLE);
+                return;
+            }
+
+            if (withChunky) {
+                broadcast(lang.prefixed("prepare.chunky-running", "progress", "0"));
+                docker.waitForChunkyReady().thenAccept(chunkyDone -> {
+                    broadcast(lang.prefixed("prepare.chunky-done"));
+                    plugin.setState(GameState.RUNNING);
+                    routeAllToGame();
+                    broadcast(lang.prefixed("game.started"));
+                });
+            } else {
+                plugin.setState(GameState.RUNNING);
+                routeAllToGame();
+                broadcast(lang.prefixed("game.started"));
+            }
+        });
+    }
+
+    private void handlePrepare(String[] args) {
+        if (plugin.getState() != GameState.IDLE) {
+            broadcast(lang.prefixed("game.already-running"));
+            return;
+        }
+
+        plugin.setState(GameState.PREPARING);
+
+        if (args.length > 1) {
+            docker.setSeed(args[1]);
+        }
+
+        broadcast(lang.prefixed("prepare.starting"));
+        docker.createGameServer(true);
+
+        docker.waitForServerReady().thenAccept(ready -> {
+            if (!ready) {
+                broadcast(lang.prefixed("game.started"));
+                plugin.setState(GameState.IDLE);
+                return;
+            }
+            broadcast(lang.prefixed("prepare.chunky-running", "progress", "0"));
+            docker.waitForChunkyReady().thenAccept(chunkyDone -> {
+                plugin.setState(GameState.RUNNING);
+                broadcast(lang.prefixed("prepare.chunky-done"));
+            });
+        });
+    }
+
+    private void handleStop() {
+        if (plugin.getState() == GameState.IDLE) {
+            broadcast(lang.prefixed("game.not-running"));
+            return;
+        }
+
+        broadcast(lang.prefixed("game.stopping"));
+        plugin.setState(GameState.STOPPING);
+
+        routeAllToLobby();
+
+        docker.stopGameServer();
+        docker.removeOldGameContainers();
+
+        if (config.lobbyAutoStart && !docker.isLobbyRunning()) {
+            docker.startLobby();
+        }
+
+        plugin.setState(GameState.IDLE);
+        broadcast(lang.prefixed("game.stopped"));
+    }
+
+    private void handleSeed(String[] args) {
+        if (args.length < 2) {
+            String seed = docker.getCurrentSeed();
+            if (seed != null) {
+                broadcast(lang.prefixed("seed.current", "seed", seed));
+            } else {
+                broadcast(lang.prefixed("seed.none"));
+            }
+            return;
+        }
+
+        if ("clear".equalsIgnoreCase(args[1])) {
+            docker.clearSeed();
+            broadcast(lang.prefixed("seed.cleared"));
+        } else {
+            docker.setSeed(args[1]);
+            broadcast(lang.prefixed("seed.set", "seed", args[1]));
+        }
+    }
+
+    private void handleState() {
+        String state = plugin.getState().name();
+        broadcast(lang.prefixed("game.state", "state", state));
+    }
+
+    private void handleCleanup() {
+        docker.removeOldGameContainers();
+        docker.cleanupGameData();
+        broadcast(lang.prefixed("cleanup.done"));
+    }
+
+    // =========================================================================
+    //    Routing
+    // =========================================================================
+
+    private void routeAllToGame() {
+        proxy.getServer("game").ifPresent(game -> {
+            proxy.getAllPlayers().forEach(player -> {
+                player.createConnectionRequest(game).fireAndForget();
+            });
+        });
+    }
+
+    private void routeAllToLobby() {
+        proxy.getServer("lobby").ifPresent(lobby -> {
+            proxy.getAllPlayers().forEach(player -> {
+                player.createConnectionRequest(lobby).fireAndForget();
+            });
+        });
+    }
+
+    public void routePlayerToLobby(com.velocitypowered.api.proxy.Player player) {
+        proxy.getServer("lobby").ifPresent(lobby -> {
+            player.sendMessage(deserialize(lang.prefixed("lobby.started")));
+            player.createConnectionRequest(lobby).fireAndForget();
+        });
+    }
+
+    // =========================================================================
+    //    Helpers
+    // =========================================================================
+
+    private void broadcast(String message) {
+        Component component = deserialize(message);
+        proxy.getAllPlayers().forEach(p -> p.sendMessage(component));
+        proxy.getConsoleCommandSource().sendMessage(component);
+    }
+
+    private boolean hasPermission(Invocation source) {
+        if (source.source().equals(proxy.getConsoleCommandSource())) {
+            return true;
+        }
+        return source.source().hasPermission("igelbingo.admin");
+    }
+
+    private Component deserialize(String text) {
+        return LegacyComponentSerializer.legacyAmpersand().deserialize(text);
+    }
+
+    @Override
+    public List<String> suggest(Invocation invocation) {
+        String[] args = invocation.arguments();
+        if (args.length == 0) {
+            return List.of("start", "prepare", "stop", "seed", "state", "cleanup");
+        }
+        if (args.length == 1) {
+            return List.of("start", "prepare", "stop", "seed", "state", "cleanup").stream()
+                    .filter(s -> s.startsWith(args[0].toLowerCase()))
+                    .toList();
+        }
+        if ("start".equals(args[0].toLowerCase()) && args.length == 2) {
+            return List.of("--clean");
+        }
+        if ("seed".equals(args[0].toLowerCase()) && args.length == 2) {
+            return List.of("clear");
+        }
+        return List.of();
+    }
+}
