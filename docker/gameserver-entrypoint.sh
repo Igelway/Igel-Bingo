@@ -30,6 +30,14 @@ create_symlinks() {
 
 create_symlinks "/opt/app-files/plugins" "/data/plugins"
 
+# === Forwarding Secret ===
+# itzg expects VELOCITY_SECRET as a value, not a file path.
+# Docker secrets are mounted as files, so we read the file into the env var.
+if [ -f "/run/secrets/forwarding_secret" ]; then
+  export VELOCITY_SECRET=$(cat /run/secrets/forwarding_secret)
+  echo "Velocity forwarding secret loaded."
+fi
+
 # === BAC Filter ===
 # Downloads and filters BlazeandCave's Advancements Pack at runtime.
 # BAC is NOT bundled in the image (license compliance).
