@@ -58,7 +58,7 @@ services:
 
   lobby:
     container_name: igelbingo-lobby
-    image: ${IGELBINGO_GAMESERVER_IMAGE:-ghcr.io/igelway/igel-bingo-gameserver:latest}
+    image: itzg/minecraft-server:latest
     restart: "no"
     environment:
       TYPE: PURPUR
@@ -75,6 +75,10 @@ services:
       PGID: ${PGID:-1000}
     secrets:
       - forwarding_secret
+    entrypoint:
+      - "sh"
+      - "-c"
+      - "export VELOCITY_SECRET=$$(cat /run/secrets/forwarding_secret 2>/dev/null || echo '') && exec /start"
     volumes:
       - ./data/lobby:/data
     ports: []
