@@ -1,82 +1,69 @@
 # Igel-Bingo
 
-Docker-basiertes Bingo-Server-System mit Velocity-Proxy, NanoLimbo und on-demand Purpur-Game-Servern.
+Docker-based Bingo server system with Velocity proxy, NanoLimbo, and on-demand Purpur game servers.
 
-## Komponenten
+Built for Minecraft 1.21.x (Purpur) with [BingoReloaded](https://github.com/Steaf23/BingoReloaded) and BlazeandCave's Advancements Pack.
 
-| Container | Beschreibung |
+## Components
+
+| Container | Description |
 |---|---|
-| **velocity** | Velocity-Proxy + IgelBingo Velocity Plugin (24/7) |
-| **limbo** | NanoLimbo — minimaler Idle-Server (24/7) |
-| **lobby** | Purpur-Lobby — startet automatisch bei Spieler-Join |
-| **game** | Purpur-Game-Server — on-demand via `/ib start` |
+| **velocity** | Velocity proxy + IgelBingo Velocity Plugin (24/7) |
+| **limbo** | NanoLimbo — minimal idle server (24/7, ~300 MB RAM) |
+| **lobby** | Purpur lobby — auto-starts when a player joins limbo, stops on idle timeout |
+| **game** | Purpur game server — on-demand via `/ib start`, fresh world per game |
 
 ## Quick Start
 
 ```bash
-# 1. Ersteinrichtung
+# 1. First-time setup
 just setup-env
 
-# 2. .env anpassen (mindestens Admins setzen)
+# 2. Edit .env (at minimum set admins)
 vim .env
 
-# 3. Starten
+# 3. Start
 just up
 
-# 4. Spiel starten (in der Velocity-Console oder als Admin)
+# 4. Start a game (in Velocity console or as admin)
 /ib start
 ```
 
 ## Commands (`/ib`)
 
-| Command | Beschreibung |
+| Command | Description |
 |---|---|
-| `/ib start [--clean]` | Spiel starten |
-| `/ib prepare [seed]` | Spiel mit Chunky-Pregeneration vorbereiten |
-| `/ib stop` | Spiel beenden |
-| `/ib seed [seed]` | Seed setzen/anzeigen |
-| `/ib seed clear` | Seed löschen (Zufall) |
-| `/ib state` | Status anzeigen |
-| `/ib cleanup` | Alle Game-Container & Daten löschen |
+| `/ib start [--clean]` | Start a game (--clean: delete old containers/volumes first) |
+| `/ib prepare [seed]` | Pre-generate with Chunky in background |
+| `/ib stop` | End the game |
+| `/ib seed [seed]` | Set or view the seed for the next game |
+| `/ib seed clear` | Clear the seed (random next start) |
+| `/ib state` | Show current game state |
+| `/ib cleanup` | Delete all game containers and data |
 
-## Env-Variablen
+## Environment Variables
 
-Siehe `.env.example` für alle verfügbaren Optionen.
+See `.env.example` for all options.
 
-Wichtige Variablen:
-- `IGELBINGO_ADMINS` — Komma-getrennte Admin-Namen
-- `IGELBINGO_GAME_MEMORY` — RAM für Game-Server (default: 6G)
-- `IGELBINGO_LOBBY_IDLE_TIMEOUT` — Sekunden bis Lobby-Inaktivitäts-Stop (0=aus)
-- `IGELBINGO_CHUNKY_PRELOAD` — Chunky-Vorgenerierung aktivieren
+Key variables:
+- `IGELBINGO_ADMINS` — Comma-separated admin usernames
+- `IGELBINGO_GAME_MEMORY` — Game server RAM (default: 6G)
+- `IGELBINGO_LOBBY_IDLE_TIMEOUT` — Seconds of inactivity before lobby stops (0 = disabled)
+- `IGELBINGO_CHUNKY_PRELOAD` — Enable Chunky pre-generation
 
-## Entwicklung
-
-```bash
-# Plugins bauen
-just build
-
-# Docker-Images lokal bauen
-just docker-build
-
-# Mit lokalen Images starten
-IGELBINGO_VELOCITY_IMAGE=igel-bingo-velocity:local \
-IGELBINGO_GAMESERVER_IMAGE=igel-bingo-gameserver:local \
-just up
-```
-
-## Architektur
+## Architecture
 
 ```
-Spieler → Velocity (25565) → Limbo (immer)
-                           → Lobby (auto-start bei Join)
-                           → Game  (on-demand /ib start)
+Player → Velocity (25565) → Limbo   (always running)
+                          → Lobby   (auto-start on join, stops on idle)
+                          → Game    (on-demand, /ib start)
 ```
 
-- **IgelBingo Velocity Plugin**: Docker-Orchestrierung, Player-Routing, Commands
-- **IgelBingo Game Plugin** (Paper): Countdown, Starter-Kit, Gamerules, World-Init (ersetzt bingo_purpur Datapack)
-- **BingoReloaded**: Spiel-Logik (Karten, Teams, Voting) — über Config-Hooks mit IgelBingo verbunden
+- **IgelBingo Velocity Plugin**: Docker orchestration, player routing, admin commands
+- **IgelBingo Game Plugin** (Paper): Countdown, starter kit (elytra + fireworks), game rules, world setup (replaces the bingo_purpur datapack)
+- **BingoReloaded**: Core game logic (cards, teams, voting) — connected via config hooks
 
-## BingoReloaded-Integration
+## BingoReloaded Integration
 
 In `plugins/BingoReloaded/config.yml`:
 ```yaml
@@ -85,6 +72,21 @@ sendCommandAfterGameEnds: "igelbingo end"
 startingCountdownTime: 0
 ```
 
-## Lizenz
+## Development
+
+```bash
+# Build both plugins
+just build
+
+# Build Docker images locally
+just docker-build
+
+# Start with local images
+IGELBINGO_VELOCITY_IMAGE=igel-bingo-velocity:local \
+IGELBINGO_GAMESERVER_IMAGE=igel-bingo-gameserver:local \
+just up
+```
+
+## License
 
 MIT
