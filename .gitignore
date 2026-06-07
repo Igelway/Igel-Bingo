@@ -10,22 +10,46 @@ gradlew
 gradlew.bat
 !**/gradle/wrapper/gradle-wrapper.jar
 
+# Java
+*.class
+hs_err_pid*
+
 # IDE
 .idea/
 *.iml
 .vscode/
 *.swp
 *.swo
+*.swn
+*~
 
-# Docker data
+# Docker data (runtime, not committed)
 data/
+
+# Secrets (NEVER commit)
 .forwarding.secret
 .playit.secret
+*.pem
+*.key
+*.crt
 
 # Environment
 .env
 *.env.local
+*.env.prod
+
+# Logs
+*.log
+logs/
+crash-reports/
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
+__MACOSX/
+
+# Zip/tar (accidental archives)
+*.zip
+*.tar.gz
+*.tgz
