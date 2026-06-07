@@ -28,9 +28,9 @@ download_with_checksum \
   "https://github.com/PlaceholderAPI/PlaceholderAPI/releases/download/2.12.2/PlaceholderAPI-2.12.2.jar" \
   ""
 
-# LuckPerms for Bukkit
+# LuckPerms for Bukkit (Modrinth CDN)
 download_with_checksum \
-  "https://download.luckperms.net/1631/bukkit/loader/LuckPerms-Bukkit-5.5.42.jar" \
+  "https://cdn.modrinth.com/data/Vebnzrzj/versions/MBSY8toc/LuckPerms-Bukkit-5.5.53.jar" \
   ""
 
 # Chunky

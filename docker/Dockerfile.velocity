@@ -16,9 +16,9 @@ RUN mkdir -p /opt/app-files/plugins
 RUN curl -o /opt/app-files/velocity.jar -L \
     "https://fill-data.papermc.io/v1/objects/0407642d1ed2883100eb823c2805523f191fa637db1f42ac0ec7ef29cbe455a9/velocity-3.5.0-SNAPSHOT-601.jar"
 
-# Download LuckPerms for Velocity
+# Download LuckPerms for Velocity (Modrinth CDN)
 RUN curl -o /opt/app-files/plugins/LuckPerms-Velocity.jar -L \
-    "https://download.luckperms.net/1631/velocity/LuckPerms-Velocity-5.5.42.jar"
+    "https://cdn.modrinth.com/data/Vebnzrzj/versions/BmxJvHsa/LuckPerms-Velocity-5.5.53.jar"
 
 # Copy IgelBingo Velocity Plugin
 COPY igelbingo-velocity/build/libs/igelbingo-velocity-*.jar /opt/app-files/plugins/
