@@ -22,11 +22,14 @@ jobs:
       - name: Build velocity plugin
         working-directory: igelbingo-velocity
         run: gradle build --no-daemon
+      - run: |
+          mkdir -p _artifacts
+          cp igelbingo-velocity/build/libs/igelbingo-velocity-*.jar _artifacts/
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: igelbingo-velocity-jar
-          path: igelbingo-velocity/build/libs/*.jar
+          path: _artifacts/
 
   build-game-plugin:
     runs-on: ubuntu-latest
@@ -40,11 +43,14 @@ jobs:
       - name: Build game plugin
         working-directory: igelbingo-game
         run: gradle build --no-daemon
+      - run: |
+          mkdir -p _artifacts
+          cp igelbingo-game/build/libs/igelbingo-game-*.jar _artifacts/
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: igelbingo-game-jar
-          path: igelbingo-game/build/libs/*.jar
+          path: _artifacts/
 
   build-velocity-image:
     needs: build-velocity-plugin
@@ -58,10 +64,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: igelbingo-velocity-jar
-      - run: |
-          mkdir -p igelbingo-velocity/build/libs
-          find . -path "*/igelbingo-velocity-*.jar" -not -path "./.gradle/*" -exec cp {} igelbingo-velocity/build/libs/ \;
-          ls -la igelbingo-velocity/build/libs/
+          path: igelbingo-velocity/build/libs/
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -99,10 +102,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: igelbingo-game-jar
-      - run: |
-          mkdir -p igelbingo-game/build/libs
-          find . -path "*/igelbingo-game-*.jar" -not -path "./.gradle/*" -exec cp {} igelbingo-game/build/libs/ \;
-          ls -la igelbingo-game/build/libs/
+          path: igelbingo-game/build/libs/
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -140,12 +140,14 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: igelbingo-velocity-jar
+          path: _release/
       - name: Download game plugin
         uses: actions/download-artifact@v4
         with:
           name: igelbingo-game-jar
+          path: _release/
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: igelbingo-*/build/libs/*.jar
+          files: _release/*.jar
           generate_release_notes: true
