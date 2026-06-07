@@ -27,6 +27,7 @@ dependencies {
 
 tasks {
     shadowJar {
+        archiveFileName.set("igelbingo-purpur-plugin.jar")
         archiveClassifier.set("")
         relocate("org.yaml.snakeyaml", "de.igelbingo.libs.snakeyaml")
     }

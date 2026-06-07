@@ -21,7 +21,7 @@ RUN curl -o /opt/app-files/plugins/LuckPerms-Velocity.jar -L \
     "https://cdn.modrinth.com/data/Vebnzrzj/versions/BmxJvHsa/LuckPerms-Velocity-5.5.53.jar"
 
 # Copy IgelBingo Velocity Plugin
-COPY igelbingo-velocity/build/libs/velocity-plugin.jar /opt/app-files/plugins/
+COPY igelbingo-velocity/build/libs/igelbingo-velocity-plugin.jar /opt/app-files/plugins/
 
 # Copy config templates
 COPY docker/defaults/velocity/ /opt/config-template/

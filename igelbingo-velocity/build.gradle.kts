@@ -27,6 +27,7 @@ dependencies {
 
 tasks {
     shadowJar {
+        archiveFileName.set("igelbingo-velocity-plugin.jar")
         archiveClassifier.set("")
         relocate("org.yaml.snakeyaml", "de.igelbingo.libs.snakeyaml")
     }

@@ -26,7 +26,7 @@ COPY docker/download-plugins.sh /tmp/download-plugins.sh
 RUN chmod +x /tmp/download-plugins.sh && /tmp/download-plugins.sh /opt/app-files/plugins
 
 # Copy IgelBingo Game Plugin
-COPY igelbingo-game/build/libs/game-plugin.jar /opt/app-files/plugins/
+COPY igelbingo-game/build/libs/igelbingo-purpur-plugin.jar /opt/app-files/plugins/
 
 # Copy BAC filter script (our code, MIT)
 COPY docker/bac-filter.sh /opt/app-files/bac-filter.sh
