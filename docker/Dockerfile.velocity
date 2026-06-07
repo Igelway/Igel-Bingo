@@ -14,7 +14,7 @@ RUN mkdir -p /opt/app-files/plugins
 
 # Download Velocity
 RUN curl -o /opt/app-files/velocity.jar -L \
-    "https://api.papermc.io/v2/projects/velocity/versions/3.4.0-SNAPSHOT/builds/566/downloads/velocity-3.4.0-SNAPSHOT-566.jar"
+    "https://api.papermc.io/v2/projects/velocity/versions/3.4.0-SNAPSHOT/builds/559/downloads/velocity-3.4.0-SNAPSHOT-559.jar"
 
 # Download LuckPerms for Velocity
 RUN curl -o /opt/app-files/plugins/LuckPerms-Velocity.jar -L \
