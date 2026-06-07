@@ -31,11 +31,22 @@ create_symlinks() {
 create_symlinks "/opt/app-files/plugins" "/data/plugins"
 
 # === Forwarding Secret ===
-# itzg expects VELOCITY_SECRET as a value, not a file path.
-# Docker secrets are mounted as files, so we read the file into the env var.
+# Paper/Purpur needs the secret in its config for Velocity modern forwarding.
+# Docker secrets are mounted as files, so we read the file and write the config.
 if [ -f "/run/secrets/forwarding_secret" ]; then
-  export VELOCITY_SECRET=$(cat /run/secrets/forwarding_secret)
-  echo "Velocity forwarding secret loaded."
+  SECRET=$(cat /run/secrets/forwarding_secret)
+  export VELOCITY_SECRET="$SECRET"
+
+  # Write velocity config for Paper/Purpur
+  mkdir -p /data/config
+  cat > /data/config/paper-global.yml << PAPEREOF
+proxies:
+  velocity:
+    enabled: true
+    online-mode: ${VELOCITY_ONLINE_MODE:-false}
+    secret: "${SECRET}"
+PAPEREOF
+  echo "Velocity forwarding configured for Paper/Purpur."
 fi
 
 # === BAC Filter ===
