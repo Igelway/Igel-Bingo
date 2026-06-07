@@ -36,7 +36,6 @@ RUN chmod +x /opt/app-files/bac-filter.sh
 COPY docker/gameserver-entrypoint.sh /gameserver-entrypoint.sh
 RUN chmod +x /gameserver-entrypoint.sh
 
-USER minecraft
 EXPOSE 25565
 
 ENTRYPOINT ["/gameserver-entrypoint.sh"]
