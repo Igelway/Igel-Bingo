@@ -130,6 +130,7 @@ public final class IgelBingoPlugin {
                 });
             } else {
                 startLobbyIdleTimer();
+                commands.routePlayerToLobby(event.getPlayer());
             }
         }).schedule();
     }

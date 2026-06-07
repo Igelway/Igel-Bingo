@@ -220,7 +220,14 @@ public final class IgelBingoCommands implements SimpleCommand {
         if (invocation.source().equals(proxy.getConsoleCommandSource())) {
             return true;
         }
-        return invocation.source().hasPermission("igelbingo.admin");
+        if (invocation.source().hasPermission("igelbingo.admin")) {
+            return true;
+        }
+        // Also check the IGELBINGO_ADMINS list from config
+        if (invocation.source() instanceof com.velocitypowered.api.proxy.Player player) {
+            return config.admins.contains(player.getUsername());
+        }
+        return false;
     }
 
     private boolean checkPermission(Invocation invocation) {

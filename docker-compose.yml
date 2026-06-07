@@ -73,6 +73,7 @@ services:
       ALLOW_FLIGHT: "TRUE"
       PUID: ${PUID:-1000}
       PGID: ${PGID:-1000}
+      IGELBINGO_LOBBY_MODE: "true"
     secrets:
       - forwarding_secret
     volumes:
