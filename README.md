@@ -8,7 +8,7 @@ Built for Minecraft 26.1.2 (Purpur) with [BingoReloaded](https://github.com/Stea
 
 | Container | Description |
 |---|---|
-| **velocity** | Velocity proxy + IgelBingo Velocity Plugin (24/7) |
+| **velocity** | Velocity proxy + Igel-Bingo Velocity Plugin (24/7) |
 | **limbo** | NanoLimbo — minimal idle server (24/7, ~300 MB RAM) |
 | **lobby** | Purpur lobby — auto-starts when a player joins limbo, stops on idle timeout |
 | **game** | Purpur game server — on-demand via `/ib start`, fresh world per game |
@@ -59,8 +59,8 @@ Player → Velocity (25565) → Limbo   (always running)
                           → Game    (on-demand, /ib start)
 ```
 
-- **IgelBingo Velocity Plugin**: Docker orchestration, player routing, admin commands
-- **IgelBingo Game Plugin** (Paper): Countdown, starter kit (elytra + fireworks), game rules, world setup (replaces the bingo_purpur datapack)
+- **Igel-Bingo Velocity Plugin**: Docker orchestration, player routing, admin commands
+- **Igel-Bingo Game Plugin** (Paper): Countdown, starter kit (elytra + fireworks), game rules, world setup (replaces the bingo_purpur datapack)
 - **BingoReloaded**: Core game logic (cards, teams, voting) — connected via config hooks
 
 ## BingoReloaded Integration
