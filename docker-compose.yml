@@ -1,7 +1,6 @@
 services:
   velocity:
     image: ${IGELBINGO_VELOCITY_IMAGE:-ghcr.io/igelway/igel-bingo-velocity:latest}
-    pull_policy: ${IGELBINGO_PULL_GAME_IMAGE:-false}
     restart: unless-stopped
     ports:
       - "25565:25577"
