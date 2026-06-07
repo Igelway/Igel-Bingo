@@ -58,7 +58,7 @@ down:
     @echo "Stopping Igel-Bingo..."
     docker compose down --remove-orphans
 
-restart:
+restart _profile="":
     @just down
     @just up {{_profile}}
 
