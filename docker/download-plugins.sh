@@ -38,9 +38,4 @@ download_with_checksum \
   "https://hangar.papermc.io/api/v1/projects/pop4959/Chunky/versions/1.5.3/PAPER/download" \
   ""
 
-# Spark (performance profiler, Modrinth)
-download_with_checksum \
-  "https://cdn.modrinth.com/data/l6YH9Als/versions/LLjnrWRW/spark-1.10.141-bukkit.jar" \
-  ""
-
 echo "All plugins downloaded."
