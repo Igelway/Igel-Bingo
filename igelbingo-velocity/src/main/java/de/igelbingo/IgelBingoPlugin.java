@@ -85,6 +85,18 @@ public final class IgelBingoPlugin {
             }).delay(3, TimeUnit.SECONDS).schedule();
         }
 
+        // Auto-configure LuckPerms permissions for configured admins
+        if (!config.admins.isEmpty()) {
+            proxy.getScheduler().buildTask(this, () -> {
+                var console = proxy.getConsoleCommandSource();
+                for (String admin : config.admins) {
+                    proxy.getCommandManager().executeAsync(console,
+                            "lp user " + admin + " permission set igelbingo.admin true");
+                }
+                logger.info("Granted igelbingo.admin to admins: " + config.admins);
+            }).delay(5, TimeUnit.SECONDS).schedule();
+        }
+
         logger.info("IgelBingo Velocity Plugin ready.");
     }
 

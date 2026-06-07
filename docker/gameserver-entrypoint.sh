@@ -30,15 +30,6 @@ create_symlinks() {
 
 create_symlinks "/opt/app-files/plugins" "/data/plugins"
 
-# === Lobby Mode ===
-# Lobby doesn't need BingoReloaded or the IgelBingo game plugin.
-if [ "${IGELBINGO_LOBBY_MODE:-false}" = "true" ]; then
-  rm -f /opt/app-files/plugins/BingoReloaded-paper-*.jar \
-        /opt/app-files/plugins/igelbingo-purpur-plugin.jar \
-        /opt/app-files/plugins/packetevents*.jar
-  echo "Lobby mode: removed game-specific plugins."
-fi
-
 # === Permissions ===
 # The /data volume may be owned by root from initial docker-compose mount.
 # Fix ownership before itzg/start switches to the minecraft user.
