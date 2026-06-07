@@ -22,16 +22,16 @@ dependencies {
     annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
 
     implementation("org.yaml:snakeyaml:2.3")
-    implementation("com.github.docker-java:docker-java-core:3.4.2")
-    implementation("com.github.docker-java:docker-java-transport-httpclient5:3.4.2")
 }
 
 tasks {
     shadowJar {
         archiveClassifier.set("")
         relocate("org.yaml.snakeyaml", "de.igelbingo.libs.snakeyaml")
-        relocate("com.github.dockerjava", "de.igelbingo.libs.dockerjava")
-        relocate("org.apache.commons", "de.igelbingo.libs.commons")
+    }
+
+    jar {
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
     build {

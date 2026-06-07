@@ -34,7 +34,7 @@ public final class IgelBingoCommands implements SimpleCommand {
             return;
         }
 
-        if (!hasPermission(source)) {
+        if (!checkPermission(invocation)) {
             source.sendMessage(deserialize(lang.prefixed("no-permission")));
             return;
         }
@@ -215,11 +215,16 @@ public final class IgelBingoCommands implements SimpleCommand {
         proxy.getConsoleCommandSource().sendMessage(component);
     }
 
-    private boolean hasPermission(Invocation source) {
-        if (source.source().equals(proxy.getConsoleCommandSource())) {
+    @Override
+    public boolean hasPermission(Invocation invocation) {
+        if (invocation.source().equals(proxy.getConsoleCommandSource())) {
             return true;
         }
-        return source.source().hasPermission("igelbingo.admin");
+        return invocation.source().hasPermission("igelbingo.admin");
+    }
+
+    private boolean checkPermission(Invocation invocation) {
+        return hasPermission(invocation);
     }
 
     private Component deserialize(String text) {

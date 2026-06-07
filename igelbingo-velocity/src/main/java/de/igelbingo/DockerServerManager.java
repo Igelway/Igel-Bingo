@@ -1,21 +1,13 @@
 package de.igelbingo;
 
-import com.github.dockerjava.api.DockerClient;
-import com.github.dockerjava.api.async.ResultCallback;
-import com.github.dockerjava.api.command.*;
-import com.github.dockerjava.api.model.*;
-import com.github.dockerjava.core.DockerClientBuilder;
-import com.github.dockerjava.transport.DockerHttpClient;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.proxy.server.ServerPing;
 
-import java.io.Closeable;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.InetSocketAddress;
+import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -30,7 +22,6 @@ public final class DockerServerManager {
     private final PluginConfig config;
     private final ProxyServer proxy;
     private final Logger logger;
-    private DockerClient dockerClient;
 
     private String currentSeed;
 
@@ -41,9 +32,7 @@ public final class DockerServerManager {
     }
 
     public void init() {
-        DockerClientBuilder builder = DockerClientBuilder.getInstance(config.dockerHost);
-        this.dockerClient = builder.build();
-        logger.info("Docker client connected to " + config.dockerHost);
+        logger.info("Docker client ready (CLI mode)");
     }
 
     // =========================================================================
@@ -55,34 +44,6 @@ public final class DockerServerManager {
 
         String seed = currentSeed != null ? currentSeed : String.valueOf(System.currentTimeMillis());
 
-        Map<String, String> env = new HashMap<>();
-        env.put("EULA", "TRUE");
-        env.put("TYPE", "PURPUR");
-        env.put("VERSION", config.gameVersion);
-        env.put("PURPUR_BUILD", config.purpurBuild);
-        env.put("ONLINE_MODE", "FALSE");
-        env.put("DIFFICULTY", config.gameDifficulty);
-        env.put("VIEW_DISTANCE", String.valueOf(config.gameViewDistance));
-        env.put("MAX_PLAYERS", String.valueOf(config.gameMaxPlayers));
-        env.put("MEMORY", config.gameMemory);
-        env.put("SPAWN_PROTECTION", "0");
-        env.put("ALLOW_FLIGHT", "TRUE");
-        env.put("LEVEL_SEED", seed);
-
-        applyForwardedEnv(env, "IGELBINGO_GAME_");
-
-        if (withChunky && config.chunkyPreload) {
-            env.put("IGELBINGO_CHUNKY_ENABLED", "true");
-            env.put("IGELBINGO_CHUNKY_OW_RADIUS", String.valueOf(config.chunkyOwRadius));
-            env.put("IGELBINGO_CHUNKY_NETHER_RADIUS", String.valueOf(config.chunkyNetherRadius));
-            env.put("IGELBINGO_CHUNKY_END_RADIUS", String.valueOf(config.chunkyEndRadius));
-        }
-
-        List<String> ops = config.gameOps;
-        if (!ops.isEmpty()) {
-            env.put("OPS", String.join(",", ops));
-        }
-
         Path dataDir = Path.of(config.gameDataDir, "game");
         try {
             Files.createDirectories(dataDir);
@@ -90,25 +51,47 @@ public final class DockerServerManager {
             logger.severe("Failed to create game data directory: " + e.getMessage());
         }
 
-        HostConfig hostConfig = HostConfig.newHostConfig()
-                .withNetworkMode(NETWORK_NAME)
-                .withBinds(Bind.parse(dataDir.toAbsolutePath() + ":/data"));
-
-        CreateContainerCmd createCmd = dockerClient.createContainerCmd(config.gameserverImage)
-                .withName(GAME_CONTAINER_NAME)
-                .withEnv(toEnvList(env))
-                .withHostConfig(hostConfig);
+        String image = config.gameserverImage;
 
         if (config.pullGameImage) {
-            try {
-                dockerClient.pullImageCmd(config.gameserverImage).start().awaitCompletion();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-            }
+            docker("pull", image);
         }
 
-        createCmd.exec();
-        dockerClient.startContainerCmd(GAME_CONTAINER_NAME).exec();
+        List<String> cmd = new ArrayList<>(List.of(
+                "docker", "run", "-d",
+                "--name", GAME_CONTAINER_NAME,
+                "--network", NETWORK_NAME,
+                "-v", dataDir.toAbsolutePath() + ":/data",
+                "-e", "EULA=TRUE",
+                "-e", "TYPE=PURPUR",
+                "-e", "VERSION=" + config.gameVersion,
+                "-e", "PURPUR_BUILD=" + config.purpurBuild,
+                "-e", "ONLINE_MODE=FALSE",
+                "-e", "DIFFICULTY=" + config.gameDifficulty,
+                "-e", "VIEW_DISTANCE=" + config.gameViewDistance,
+                "-e", "MAX_PLAYERS=" + config.gameMaxPlayers,
+                "-e", "MEMORY=" + config.gameMemory,
+                "-e", "SPAWN_PROTECTION=0",
+                "-e", "ALLOW_FLIGHT=TRUE",
+                "-e", "LEVEL_SEED=" + seed
+        ));
+
+        // Forward IGELBINGO_GAME_* env vars
+        System.getenv().forEach((key, value) -> {
+            if (key.startsWith("IGELBINGO_GAME_") && key.length() > 16) {
+                cmd.add("-e");
+                cmd.add(key.substring(16) + "=" + value);
+            }
+        });
+
+        if (!config.gameOps.isEmpty()) {
+            cmd.add("-e");
+            cmd.add("OPS=" + String.join(",", config.gameOps));
+        }
+
+        cmd.add(image);
+
+        docker(cmd.toArray(new String[0]));
 
         logger.info("Game container created and started (seed: " + seed + ")");
     }
@@ -128,10 +111,8 @@ public final class DockerServerManager {
         Thread thread = new Thread(() -> {
             while (System.currentTimeMillis() - start < timeout) {
                 try {
-                    InspectContainerResponse inspect = dockerClient.inspectContainerCmd(GAME_CONTAINER_NAME).exec();
-                    InspectContainerResponse.ContainerState state = inspect.getState();
-                    if (state != null && Boolean.TRUE.equals(state.getRunning())) {
-                        // Also check Velocity can ping it
+                    String state = dockerInspect(GAME_CONTAINER_NAME, "State.Running");
+                    if ("true".equals(state)) {
                         try {
                             gameServer.ping().get(3, TimeUnit.SECONDS);
                             future.complete(true);
@@ -160,36 +141,13 @@ public final class DockerServerManager {
     public CompletableFuture<Boolean> waitForChunkyReady() {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
 
-        RegisteredServer gameServer = proxy.getServer("game").orElse(null);
-        if (gameServer == null) {
-            future.complete(true);
-            return future;
-        }
-
         long start = System.currentTimeMillis();
-        long timeout = 600_000; // 10 min for chunky
+        long timeout = 600_000;
 
         Thread thread = new Thread(() -> {
             while (System.currentTimeMillis() - start < timeout) {
                 try {
-                    ExecCreateCmd execCreate = dockerClient.execCreateCmd(GAME_CONTAINER_NAME)
-                            .withCmd("rcon-cli", "chunky", "progress")
-                            .withAttachStdout(true)
-                            .withAttachStderr(true);
-
-                    ExecCreateCmdResponse execCreateResp = execCreate.exec();
-
-                    StringBuilder output = new StringBuilder();
-                    dockerClient.execStartCmd(execCreateResp.getId())
-                            .exec(new ResultCallback.Adapter<>() {
-                                @Override
-                                public void onNext(Frame frame) {
-                                    output.append(new String(frame.getPayload()));
-                                }
-                            })
-                            .awaitCompletion();
-
-                    String out = output.toString();
+                    String out = dockerExec(GAME_CONTAINER_NAME, "rcon-cli", "chunky", "progress");
                     if (out.contains("Task is done") || out.contains("No tasks currently running") || out.contains("no tasks")) {
                         future.complete(true);
                         return;
@@ -204,7 +162,7 @@ public final class DockerServerManager {
                     return;
                 }
             }
-            future.complete(true); // Timeout, continue anyway
+            future.complete(true);
         });
         thread.setDaemon(true);
         thread.start();
@@ -213,23 +171,17 @@ public final class DockerServerManager {
     }
 
     public void stopGameServer() {
-        try {
-            dockerClient.stopContainerCmd(GAME_CONTAINER_NAME).withTimeout(10).exec();
-        } catch (Exception ignored) {
-        }
+        docker("stop", "-t", "10", GAME_CONTAINER_NAME);
     }
 
     public void removeOldGameContainers() {
         try {
-            for (var container : dockerClient.listContainersCmd().withShowAll(true).exec()) {
-                for (String name : container.getNames()) {
-                    if (name != null && name.contains("igelbingo-game")) {
-                        try {
-                            dockerClient.removeContainerCmd(container.getId()).withForce(true).exec();
-                            logger.info("Removed old game container: " + container.getId());
-                        } catch (Exception ignored) {
-                        }
-                    }
+            String out = docker("ps", "-aqf", "name=igelbingo-game");
+            for (String line : out.split("\n")) {
+                String id = line.trim();
+                if (!id.isEmpty()) {
+                    docker("rm", "-f", id);
+                    logger.info("Removed old game container: " + id);
                 }
             }
         } catch (Exception ignored) {
@@ -259,8 +211,8 @@ public final class DockerServerManager {
 
     public boolean isLobbyRunning() {
         try {
-            InspectContainerResponse inspect = dockerClient.inspectContainerCmd(LOBBY_CONTAINER_NAME).exec();
-            return inspect.getState() != null && Boolean.TRUE.equals(inspect.getState().getRunning());
+            String state = dockerInspect(LOBBY_CONTAINER_NAME, "State.Running");
+            return "true".equals(state);
         } catch (Exception e) {
             return false;
         }
@@ -268,7 +220,7 @@ public final class DockerServerManager {
 
     public void startLobby() {
         try {
-            dockerClient.startContainerCmd(LOBBY_CONTAINER_NAME).exec();
+            docker("start", LOBBY_CONTAINER_NAME);
             logger.info("Lobby container started");
         } catch (Exception e) {
             logger.warning("Failed to start lobby container: " + e.getMessage());
@@ -277,7 +229,7 @@ public final class DockerServerManager {
 
     public void stopLobby() {
         try {
-            dockerClient.stopContainerCmd(LOBBY_CONTAINER_NAME).withTimeout(10).exec();
+            docker("stop", "-t", "10", LOBBY_CONTAINER_NAME);
             logger.info("Lobby container stopped");
         } catch (Exception e) {
             logger.warning("Failed to stop lobby container: " + e.getMessage());
@@ -321,25 +273,54 @@ public final class DockerServerManager {
     }
 
     // =========================================================================
-    //    Helpers
+    //    Docker CLI helpers
     // =========================================================================
 
-    private void applyForwardedEnv(Map<String, String> target, String prefix) {
-        System.getenv().forEach((key, value) -> {
-            if (key.startsWith(prefix)) {
-                String itzgKey = key.substring(prefix.length());
-                if (!itzgKey.isEmpty() && !target.containsKey(itzgKey)) {
-                    target.put(itzgKey, value);
-                }
-            }
-        });
+    private String docker(String... args) {
+        List<String> cmd = new ArrayList<>();
+        cmd.add("docker");
+        cmd.addAll(Arrays.asList(args));
+        return exec(cmd);
     }
 
-    private List<String> toEnvList(Map<String, String> env) {
-        List<String> result = new ArrayList<>();
-        env.forEach((k, v) -> result.add(k + "=" + v));
-        return result;
+    private String dockerInspect(String container, String format) {
+        return docker("inspect", "-f", "{{." + format + "}}", container).trim();
     }
+
+    private String dockerExec(String container, String... command) {
+        List<String> cmd = new ArrayList<>(List.of("docker", "exec", container));
+        cmd.addAll(Arrays.asList(command));
+        return exec(cmd);
+    }
+
+    private String exec(List<String> command) {
+        try {
+            ProcessBuilder pb = new ProcessBuilder(command);
+            pb.redirectErrorStream(true);
+            Process process = pb.start();
+
+            StringBuilder output = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    output.append(line).append("\n");
+                }
+            }
+
+            int exitCode = process.waitFor();
+            if (exitCode != 0 && !command.get(0).equals("docker") && !"inspect".equals(command.get(1))) {
+                logger.warning("Command exited with " + exitCode + ": " + String.join(" ", command));
+            }
+
+            return output.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to execute: " + String.join(" ", command), e);
+        }
+    }
+
+    // =========================================================================
+    //    Helpers
+    // =========================================================================
 
     private void deleteRecursively(Path path) {
         try {
@@ -354,11 +335,6 @@ public final class DockerServerManager {
     }
 
     public void close() {
-        try {
-            if (dockerClient instanceof Closeable) {
-                ((Closeable) dockerClient).close();
-            }
-        } catch (IOException ignored) {
-        }
+        // no cleanup needed for CLI mode
     }
 }
