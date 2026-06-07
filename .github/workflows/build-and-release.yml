@@ -22,14 +22,12 @@ jobs:
       - name: Build velocity plugin
         working-directory: igelbingo-velocity
         run: gradle build --no-daemon
-      - run: |
-          mkdir -p _artifacts
-          cp igelbingo-velocity/build/libs/igelbingo-velocity-*.jar _artifacts/
+      - run: cp igelbingo-velocity/build/libs/igelbingo-velocity-*.jar ./velocity-plugin.jar
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: igelbingo-velocity-jar
-          path: _artifacts/
+          path: velocity-plugin.jar
 
   build-game-plugin:
     runs-on: ubuntu-latest
@@ -43,14 +41,12 @@ jobs:
       - name: Build game plugin
         working-directory: igelbingo-game
         run: gradle build --no-daemon
-      - run: |
-          mkdir -p _artifacts
-          cp igelbingo-game/build/libs/igelbingo-game-*.jar _artifacts/
+      - run: cp igelbingo-game/build/libs/igelbingo-game-*.jar ./game-plugin.jar
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: igelbingo-game-jar
-          path: _artifacts/
+          path: game-plugin.jar
 
   build-velocity-image:
     needs: build-velocity-plugin
