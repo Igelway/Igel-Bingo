@@ -1,8 +1,0 @@
-{
-  "pack": {
-    "pack_format": [69, 0],
-    "min_supported_format": 69,
-    "max_supported_format": 9999,
-    "description": "Igel-Bingo: German translations for BAC advancements & Bingo sounds"
-  }
-}
