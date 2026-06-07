@@ -1,5 +1,6 @@
 services:
   velocity:
+    container_name: igelbingo-velocity
     image: ${IGELBINGO_VELOCITY_IMAGE:-ghcr.io/igelway/igel-bingo-velocity:latest}
     restart: unless-stopped
     ports:

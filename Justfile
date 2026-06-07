@@ -68,7 +68,7 @@ logs:
     docker compose logs -f
 
 console server="velocity":
-    docker compose exec {{server}} rcon-cli || docker attach igelbingo-{{server}}
+    docker attach igelbingo-{{server}}
 
 pull:
     docker compose pull
