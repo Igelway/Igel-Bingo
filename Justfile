@@ -28,9 +28,9 @@ setup-env:
 
 build:
     @echo "Building igelbingo-velocity..."
-    cd igelbingo-velocity && gradle build --no-daemon
+    cd igelbingo-velocity && ./gradlew build --no-daemon
     @echo "Building igelbingo-game..."
-    cd igelbingo-game && gradle build --no-daemon
+    cd igelbingo-game && ./gradlew build --no-daemon
 
 docker-build-velocity: build
     @echo "Building velocity Docker image..."
