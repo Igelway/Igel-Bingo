@@ -30,6 +30,13 @@ create_symlinks() {
 
 create_symlinks "/opt/app-files/plugins" "/data/plugins"
 
+# === Permissions ===
+# The /data volume may be owned by root from initial docker-compose mount.
+# Fix ownership before itzg/start switches to the minecraft user.
+if [ "$(id -u)" -eq 0 ]; then
+  chown -R minecraft:minecraft /data 2>/dev/null || true
+fi
+
 # === Forwarding Secret ===
 # Paper/Purpur needs the secret in its config for Velocity modern forwarding.
 # Docker secrets are mounted as files, so we read the file and write the config.
@@ -47,6 +54,8 @@ proxies:
     secret: "${SECRET}"
 PAPEREOF
   echo "Velocity forwarding configured for Paper/Purpur."
+else
+  echo "WARNING: No forwarding secret found at /run/secrets/forwarding_secret"
 fi
 
 # === BAC Filter ===
