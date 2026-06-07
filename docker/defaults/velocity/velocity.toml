@@ -38,10 +38,10 @@ ping-passthrough = "DISABLED"
 enable-player-address-logging = true
 
 [servers]
-# Docker Compose service names as addresses
-lobby = "igelbingo-lobby:25565"
-game = "igelbingo-game:25565"
-limbo = "igelbingo-limbo:25565"
+# Docker Compose service names as addresses (resolved via Docker internal DNS)
+lobby = "lobby:25565"
+game = "game:25565"
+limbo = "limbo:25565"
 
 # Order to try servers when a player connects
 try = [

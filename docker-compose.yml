@@ -38,6 +38,7 @@ services:
       - limbo
 
   limbo:
+    container_name: igelbingo-limbo
     image: itzg/minecraft-server:latest
     restart: unless-stopped
     environment:
@@ -55,6 +56,7 @@ services:
       - igelbingo-network
 
   lobby:
+    container_name: igelbingo-lobby
     image: ${IGELBINGO_GAMESERVER_IMAGE:-ghcr.io/igelway/igel-bingo-gameserver:latest}
     restart: "no"
     environment:
