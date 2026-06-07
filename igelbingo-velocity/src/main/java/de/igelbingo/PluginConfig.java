@@ -19,7 +19,7 @@ public final class PluginConfig {
     public List<String> admins = new ArrayList<>();
 
     // Game server
-    public String gameVersion = "1.21.5";
+    public String gameVersion = "26.1.2";
     public String purpurBuild = "LATEST";
     public List<String> gameOps = new ArrayList<>();
     public String gameMemory = "6G";

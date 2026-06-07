@@ -1,6 +1,6 @@
 plugins {
     id("java")
-    id("com.gradleup.shadow") version "8.3.5"
+    id("com.gradleup.shadow") version "9.4.2"
 }
 
 group = "de.igelbingo"
@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.5-R0.1-SNAPSHOT")
+    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
     compileOnly("me.clip:placeholderapi:2.12.2")
 
     implementation("org.yaml:snakeyaml:2.3")
