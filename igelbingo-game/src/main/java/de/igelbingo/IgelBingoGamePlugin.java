@@ -19,6 +19,9 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import org.popcraft.chunky.api.ChunkyAPI;
+import org.popcraft.chunky.api.event.task.GenerationCompleteEvent;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
@@ -49,6 +52,10 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         loadGameConfig();
 
         extractResourcePack();
+
+        if ("true".equalsIgnoreCase(System.getenv("IGELBINGO_CHUNKY_PRELOAD"))) {
+            startChunkyPreload();
+        }
 
         getLogger().info("IgelBingo Game Plugin enabled.");
     }
@@ -505,9 +512,71 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     }
 
     public void sendPluginMessage(String message) {
+        byte[] data = message.getBytes(java.nio.charset.StandardCharsets.UTF_8);
         if (!getServer().getOnlinePlayers().isEmpty()) {
             Player first = getServer().getOnlinePlayers().iterator().next();
-            first.sendPluginMessage(this, CHANNEL, message.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            first.sendPluginMessage(this, CHANNEL, data);
+        } else {
+            getServer().sendPluginMessage(this, CHANNEL, data);
+        }
+    }
+
+    // =========================================================================
+    //    Chunky Preload
+    // =========================================================================
+
+    private void startChunkyPreload() {
+        ChunkyAPI chunky = getServer().getServicesManager().load(ChunkyAPI.class);
+        if (chunky == null) {
+            getLogger().warning("Chunky API not available — is Chunky installed?");
+            sendPluginMessage("chunky_done");
+            return;
+        }
+
+        int owRadius = envInt("IGELBINGO_CHUNKY_OW_RADIUS", 5000);
+        int netherRadius = envInt("IGELBINGO_CHUNKY_NETHER_RADIUS", 2000);
+        int endRadius = envInt("IGELBINGO_CHUNKY_END_RADIUS", 2000);
+
+        int[] completed = {0};
+        int[] started = {0};
+
+        chunky.onGenerationComplete((GenerationCompleteEvent event) -> {
+            completed[0]++;
+            getLogger().info("Chunky generation complete for " + event.world()
+                    + " (" + completed[0] + "/" + started[0] + ")");
+            if (completed[0] >= started[0]) {
+                getLogger().info("All Chunky preload tasks complete!");
+                sendPluginMessage("chunky_done");
+            }
+        });
+
+        World overworld = getServer().getWorlds().getFirst();
+        chunky.startTask(overworld.getName(), "square", 0, 0, owRadius, owRadius, "concentric");
+        started[0]++;
+
+        World nether = getServer().getWorld(overworld.getName() + "_nether");
+        if (nether != null) {
+            chunky.startTask(nether.getName(), "square", 0, 0, netherRadius, netherRadius, "concentric");
+            started[0]++;
+        }
+
+        World end = getServer().getWorld(overworld.getName() + "_the_end");
+        if (end != null) {
+            chunky.startTask(end.getName(), "square", 0, 0, endRadius, endRadius, "concentric");
+            started[0]++;
+        }
+
+        getLogger().info("Chunky preload started for " + started[0] + " worlds"
+                + " (ow=" + owRadius + ", nether=" + netherRadius + ", end=" + endRadius + ")");
+    }
+
+    private int envInt(String key, int def) {
+        String val = System.getenv(key);
+        if (val == null) return def;
+        try {
+            return Integer.parseInt(val);
+        } catch (NumberFormatException e) {
+            return def;
         }
     }
 

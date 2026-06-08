@@ -24,6 +24,7 @@ public final class DockerServerManager {
     private final Logger logger;
 
     private String currentSeed;
+    private CompletableFuture<Boolean> chunkyReadyFuture;
 
     public DockerServerManager(PluginConfig config, ProxyServer proxy, Logger logger) {
         this.config = config;
@@ -89,6 +90,17 @@ public final class DockerServerManager {
             cmd.add("OPS=" + String.join(",", config.gameOps));
         }
 
+        if (withChunky) {
+            cmd.add("-e");
+            cmd.add("IGELBINGO_CHUNKY_PRELOAD=true");
+            cmd.add("-e");
+            cmd.add("IGELBINGO_CHUNKY_OW_RADIUS=" + config.chunkyOwRadius);
+            cmd.add("-e");
+            cmd.add("IGELBINGO_CHUNKY_NETHER_RADIUS=" + config.chunkyNetherRadius);
+            cmd.add("-e");
+            cmd.add("IGELBINGO_CHUNKY_END_RADIUS=" + config.chunkyEndRadius);
+        }
+
         cmd.add(image);
 
         docker(cmd.toArray(new String[0]));
@@ -139,37 +151,40 @@ public final class DockerServerManager {
     }
 
     public CompletableFuture<Boolean> waitForChunkyReady() {
-        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        chunkyReadyFuture = new CompletableFuture<>();
 
         long start = System.currentTimeMillis();
         long timeout = 600_000;
 
         Thread thread = new Thread(() -> {
-            boolean chunkyEverResponded = false;
             while (System.currentTimeMillis() - start < timeout) {
+                if (chunkyReadyFuture.isDone()) return;
                 try {
-                    String out = dockerExec(GAME_CONTAINER_NAME, "rcon-cli", "chunky", "progress");
-                    chunkyEverResponded = true;
-                    if (out.contains("Task is done") || out.contains("No tasks currently running") || out.contains("no tasks")) {
-                        future.complete(true);
-                        return;
-                    }
-                } catch (Exception ignored) {
-                }
-                try {
-                    Thread.sleep(5000);
+                    Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
-                    future.completeExceptionally(e);
+                    if (!chunkyReadyFuture.isDone()) {
+                        chunkyReadyFuture.complete(false);
+                    }
                     return;
                 }
             }
-            future.complete(chunkyEverResponded);
+            if (!chunkyReadyFuture.isDone()) {
+                logger.warning("Chunky preload timed out after 10 minutes");
+                chunkyReadyFuture.complete(false);
+            }
         });
         thread.setDaemon(true);
         thread.start();
 
-        return future;
+        return chunkyReadyFuture;
+    }
+
+    public void onChunkyDone() {
+        if (chunkyReadyFuture != null && !chunkyReadyFuture.isDone()) {
+            chunkyReadyFuture.complete(true);
+            logger.info("Chunky preload completed (signal from game plugin)");
+        }
     }
 
     public void stopGameServer() {
@@ -287,12 +302,6 @@ public final class DockerServerManager {
 
     private String dockerInspect(String container, String format) {
         return docker("inspect", "-f", "{{." + format + "}}", container).trim();
-    }
-
-    private String dockerExec(String container, String... command) {
-        List<String> cmd = new ArrayList<>(List.of("docker", "exec", container));
-        cmd.addAll(Arrays.asList(command));
-        return exec(cmd);
     }
 
     private String exec(List<String> command) {

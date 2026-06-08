@@ -15,10 +15,12 @@ java {
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.codemc.io/repository/maven-public/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.1.2.build.69-stable")
+    compileOnly("org.popcraft:chunky-common:1.3.38")
     implementation("org.yaml:snakeyaml:2.4")
 }
 

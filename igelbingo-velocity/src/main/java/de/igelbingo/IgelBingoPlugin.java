@@ -181,6 +181,9 @@ public final class IgelBingoPlugin {
             handleGameEnded();
         } else if ("game_started".equals(message)) {
             logger.info("Game started signal received from game server");
+        } else if ("chunky_done".equals(message)) {
+            logger.info("Chunky preload done signal received from game server");
+            dockerManager.onChunkyDone();
         }
     }
 
