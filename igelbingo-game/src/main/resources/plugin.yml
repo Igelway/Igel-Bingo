@@ -1,5 +1,5 @@
 name: IgelBingo
-version: 1.0.8
+version: 1.0.9
 main: de.igelbingo.IgelBingoGamePlugin
 api-version: "26.1.2"
 description: Game management plugin for Igel-Bingo (replaces bingo_purpur datapack)
