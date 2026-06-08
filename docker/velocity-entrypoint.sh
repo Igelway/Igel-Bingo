@@ -62,6 +62,15 @@ ln -sf /opt/app-files/velocity.jar /data/velocity.jar
 create_symlinks "/opt/app-files/plugins" "/data/plugins"
 
 echo "Starting Velocity..."
+# Ensure minecraft user can access Docker socket
+if [ -S /var/run/docker.sock ]; then
+  DOCKER_GID=$(stat -c '%g' /var/run/docker.sock 2>/dev/null || echo "")
+  if [ -n "$DOCKER_GID" ] && [ "$DOCKER_GID" != "0" ]; then
+    groupmod -g "$DOCKER_GID" docker 2>/dev/null || groupadd -g "$DOCKER_GID" docker 2>/dev/null || true
+  fi
+  usermod -aG docker minecraft 2>/dev/null || true
+  echo "Docker socket GID=$DOCKER_GID, minecraft added to docker group"
+fi
 JAVA_BIN="${JAVA_HOME:-/opt/java/openjdk}/bin/java"
 cd /data
 if [ "$(id -u)" -eq 0 ]; then

@@ -45,7 +45,11 @@ public final class DockerServerManager {
 
         String seed = currentSeed != null ? currentSeed : String.valueOf(System.currentTimeMillis());
 
-        Path dataDir = Path.of(config.gameDataDir, "game");
+        String gameDataBase = config.gameDataDir;
+        if (!gameDataBase.startsWith("/")) {
+            gameDataBase = "/managed-data";
+        }
+        Path dataDir = Path.of(gameDataBase, "game");
         try {
             Files.createDirectories(dataDir);
         } catch (IOException e) {
@@ -79,9 +83,9 @@ public final class DockerServerManager {
 
         // Forward IGELBINGO_GAME_* env vars
         System.getenv().forEach((key, value) -> {
-            if (key.startsWith("IGELBINGO_GAME_") && key.length() > 16) {
+            if (key.startsWith("IGELBINGO_GAME_") && key.length() > 15) {
                 cmd.add("-e");
-                cmd.add(key.substring(16) + "=" + value);
+                cmd.add(key.substring(15) + "=" + value);
             }
         });
 

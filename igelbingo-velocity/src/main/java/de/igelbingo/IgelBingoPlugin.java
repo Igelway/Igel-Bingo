@@ -14,6 +14,7 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 
 import com.google.inject.Inject;
 import java.nio.file.Path;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -91,15 +92,33 @@ public final class IgelBingoPlugin {
         String username = event.getPlayer().getUsername();
         if (!config.admins.contains(username)) return;
 
-        proxy.getCommandManager().executeAsync(proxy.getConsoleCommandSource(),
-                "lp user " + username + " permission set igelbingo.admin true")
-                .thenAccept(success -> {
-                    if (success) {
-                        logger.info("Granted igelbingo.admin to " + username + " (on login)");
-                    } else {
-                        logger.warning("Failed to grant igelbingo.admin to " + username);
-                    }
-                });
+        proxy.getScheduler().buildTask(this, () -> grantAdminPermission(event.getPlayer().getUniqueId(), username))
+                .delay(2, TimeUnit.SECONDS).schedule();
+    }
+
+    private void grantAdminPermission(UUID uuid, String username) {
+        try {
+            if (proxy.getPluginManager().getPlugin("luckperms").isEmpty()) {
+                logger.warning("LuckPerms not loaded — cannot grant igelbingo.admin to " + username);
+                return;
+            }
+            net.luckperms.api.LuckPerms api = net.luckperms.api.LuckPermsProvider.get();
+            net.luckperms.api.model.user.User user = api.getUserManager().loadUser(uuid).get();
+            if (user == null) {
+                logger.warning("Could not load LuckPerms user for " + username);
+                return;
+            }
+            net.luckperms.api.node.Node node = net.luckperms.api.node.Node.builder("igelbingo.admin").build();
+            if (user.data().contains(node, net.luckperms.api.node.NodeEqualityPredicate.IGNORE_EXPIRY_TIME).asBoolean()) {
+                logger.info(username + " already has igelbingo.admin, skipping");
+                return;
+            }
+            user.data().add(node);
+            api.getUserManager().saveUser(user);
+            logger.info("Granted igelbingo.admin to " + username + " via LuckPerms API");
+        } catch (Exception e) {
+            logger.severe("Failed to grant igelbingo.admin to " + username + ": " + e.getMessage());
+        }
     }
 
     @Subscribe

@@ -6,7 +6,8 @@ ARG PGID=1000
 RUN apt-get update && apt-get install -y curl docker.io && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -g ${PGID} minecraft || true && \
-    useradd -u ${PUID} -g ${PGID} -m -s /bin/sh minecraft || true
+    useradd -u ${PUID} -g ${PGID} -m -s /bin/sh minecraft || true && \
+    usermod -aG docker minecraft
 
 WORKDIR /data
 
