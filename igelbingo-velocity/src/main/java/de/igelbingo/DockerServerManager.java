@@ -267,7 +267,7 @@ public final class DockerServerManager {
         }
 
         long start = System.currentTimeMillis();
-        long timeout = 60_000;
+        long timeout = 180_000;
 
         Thread thread = new Thread(() -> {
             while (System.currentTimeMillis() - start < timeout) {
