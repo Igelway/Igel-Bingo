@@ -71,7 +71,7 @@ logs:
     docker compose logs -f
 
 console server="velocity":
-    docker attach igelbingo-{{server}}
+    docker attach --sig-proxy=false --detach-keys="ctrl-p,ctrl-q" igelbingo-{{server}}
 
 pull:
     docker compose pull

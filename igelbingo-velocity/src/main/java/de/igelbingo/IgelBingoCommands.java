@@ -75,7 +75,7 @@ public final class IgelBingoCommands implements SimpleCommand {
 
         docker.waitForServerReady().thenAccept(ready -> {
             if (!ready) {
-                broadcast(lang.prefixed("game.started"));
+                broadcast(lang.prefixed("game.start-failed"));
                 plugin.setState(GameState.IDLE);
                 return;
             }
@@ -83,7 +83,11 @@ public final class IgelBingoCommands implements SimpleCommand {
             if (withChunky) {
                 broadcast(lang.prefixed("prepare.chunky-running", "progress", "0"));
                 docker.waitForChunkyReady().thenAccept(chunkyDone -> {
-                    broadcast(lang.prefixed("prepare.chunky-done"));
+                    if (chunkyDone) {
+                        broadcast(lang.prefixed("prepare.chunky-done"));
+                    } else {
+                        broadcast(lang.prefixed("prepare.chunky-timeout"));
+                    }
                     plugin.setState(GameState.RUNNING);
                     routeAllToGame();
                     broadcast(lang.prefixed("game.started"));
@@ -113,14 +117,18 @@ public final class IgelBingoCommands implements SimpleCommand {
 
         docker.waitForServerReady().thenAccept(ready -> {
             if (!ready) {
-                broadcast(lang.prefixed("game.started"));
+                broadcast(lang.prefixed("prepare.start-failed"));
                 plugin.setState(GameState.IDLE);
                 return;
             }
             broadcast(lang.prefixed("prepare.chunky-running", "progress", "0"));
             docker.waitForChunkyReady().thenAccept(chunkyDone -> {
+                if (chunkyDone) {
+                    broadcast(lang.prefixed("prepare.chunky-done"));
+                } else {
+                    broadcast(lang.prefixed("prepare.chunky-timeout"));
+                }
                 plugin.setState(GameState.RUNNING);
-                broadcast(lang.prefixed("prepare.chunky-done"));
             });
         });
     }

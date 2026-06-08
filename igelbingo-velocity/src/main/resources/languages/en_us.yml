@@ -11,6 +11,7 @@ game:
   starting: "&aStarting Bingo server..."
   starting-pregen: "&aStarting Bingo server with Chunky pre-generation..."
   started: "&aGame started! Server is ready."
+  start-failed: "&cServer startup failed (timeout)."
   already-running: "&cA game is already running."
   not-running: "&cNo game is running."
   stopping: "&eStopping game..."
@@ -22,6 +23,8 @@ prepare:
   starting: "&aPreparing Bingo server with Chunky pre-generation..."
   chunky-running: "&eChunky running... Progress: {progress}%"
   chunky-done: "&aChunky pre-generation complete! Server is ready."
+  start-failed: "&cServer preparation failed (timeout)."
+  chunky-timeout: "&cChunky pre-generation failed (timeout). Server is nevertheless ready."
 
 seed:
   set: "&aSeed set: {seed}"

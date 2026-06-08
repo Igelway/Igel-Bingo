@@ -11,6 +11,7 @@ game:
   starting: "&aBingo-Server wird gestartet..."
   starting-pregen: "&aBingo-Server wird gestartet mit Chunky-Vorgenerierung..."
   started: "&aSpiel gestartet! Server ist bereit."
+  start-failed: "&cServer-Start fehlgeschlagen (Timeout)."
   already-running: "&cEin Spiel läuft bereits."
   not-running: "&cKein Spiel läuft."
   stopping: "&eSpiel wird beendet..."
@@ -22,6 +23,8 @@ prepare:
   starting: "&aBingo-Server wird vorbereitet mit Chunky-Pregeneration..."
   chunky-running: "&eChunky läuft... Fortschritt: {progress}%"
   chunky-done: "&aChunky-Vorgenerierung abgeschlossen! Server ist bereit."
+  start-failed: "&cServer-Vorbereitung fehlgeschlagen (Timeout)."
+  chunky-timeout: "&cChunky-Vorgenerierung fehlgeschlagen (Timeout). Server dennoch bereit."
 
 seed:
   set: "&aSeed gesetzt: {seed}"

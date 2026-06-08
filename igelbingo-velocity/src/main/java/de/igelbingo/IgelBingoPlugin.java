@@ -1,8 +1,8 @@
 package de.igelbingo;
 
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
+import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
@@ -10,10 +10,7 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
-import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.proxy.server.ServerPing;
 
 import com.google.inject.Inject;
 import java.nio.file.Path;
@@ -85,19 +82,24 @@ public final class IgelBingoPlugin {
             }).delay(3, TimeUnit.SECONDS).schedule();
         }
 
-        // Auto-configure LuckPerms permissions for configured admins
-        if (!config.admins.isEmpty()) {
-            proxy.getScheduler().buildTask(this, () -> {
-                var console = proxy.getConsoleCommandSource();
-                for (String admin : config.admins) {
-                    proxy.getCommandManager().executeAsync(console,
-                            "lp user " + admin + " permission set igelbingo.admin true");
-                }
-                logger.info("Granted igelbingo.admin to admins: " + config.admins);
-            }).delay(5, TimeUnit.SECONDS).schedule();
-        }
-
         logger.info("IgelBingo Velocity Plugin ready.");
+    }
+
+    @Subscribe
+    public void onPostLogin(PostLoginEvent event) {
+        if (config.admins.isEmpty()) return;
+        String username = event.getPlayer().getUsername();
+        if (!config.admins.contains(username)) return;
+
+        proxy.getCommandManager().executeAsync(proxy.getConsoleCommandSource(),
+                "lp user " + username + " permission set igelbingo.admin true")
+                .thenAccept(success -> {
+                    if (success) {
+                        logger.info("Granted igelbingo.admin to " + username + " (on login)");
+                    } else {
+                        logger.warning("Failed to grant igelbingo.admin to " + username);
+                    }
+                });
     }
 
     @Subscribe

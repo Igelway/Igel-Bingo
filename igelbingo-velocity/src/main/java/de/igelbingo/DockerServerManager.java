@@ -145,9 +145,11 @@ public final class DockerServerManager {
         long timeout = 600_000;
 
         Thread thread = new Thread(() -> {
+            boolean chunkyEverResponded = false;
             while (System.currentTimeMillis() - start < timeout) {
                 try {
                     String out = dockerExec(GAME_CONTAINER_NAME, "rcon-cli", "chunky", "progress");
+                    chunkyEverResponded = true;
                     if (out.contains("Task is done") || out.contains("No tasks currently running") || out.contains("no tasks")) {
                         future.complete(true);
                         return;
@@ -162,7 +164,7 @@ public final class DockerServerManager {
                     return;
                 }
             }
-            future.complete(true);
+            future.complete(chunkyEverResponded);
         });
         thread.setDaemon(true);
         thread.start();
@@ -308,7 +310,7 @@ public final class DockerServerManager {
             }
 
             int exitCode = process.waitFor();
-            if (exitCode != 0 && !command.get(0).equals("docker") && !"inspect".equals(command.get(1))) {
+            if (exitCode != 0 && command.size() > 1 && !"inspect".equals(command.get(1))) {
                 logger.warning("Command exited with " + exitCode + ": " + String.join(" ", command));
             }
 
