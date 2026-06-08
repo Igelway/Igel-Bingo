@@ -71,7 +71,7 @@ public final class IgelBingoPlugin {
 
         commands = new IgelBingoCommands(this);
         proxy.getCommandManager().register(
-                proxy.getCommandManager().metaBuilder("ib").build(),
+                proxy.getCommandManager().metaBuilder("ib").plugin(this).build(),
                 commands
         );
 
