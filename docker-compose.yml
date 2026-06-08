@@ -99,6 +99,7 @@ services:
 
 networks:
   igelbingo-network:
+    name: igelbingo-network
     driver: bridge
 
 secrets:
