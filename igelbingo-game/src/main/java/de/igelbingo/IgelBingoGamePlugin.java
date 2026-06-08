@@ -1,6 +1,11 @@
 package de.igelbingo;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+
 import org.bukkit.*;
+import org.bukkit.GameRules;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -130,15 +135,15 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     }
 
     private void applyGameRules(World world) {
-        world.setGameRule(GameRule.FALL_DAMAGE, false);
-        world.setGameRule(GameRule.FIRE_DAMAGE, false);
-        world.setGameRule(GameRule.FREEZE_DAMAGE, false);
-        world.setGameRule(GameRule.KEEP_INVENTORY, true);
-        world.setGameRule(GameRule.DO_IMMEDIATE_RESPAWN, true);
-        world.setGameRule(GameRule.REDUCED_DEBUG_INFO, true);
-        world.setGameRule(GameRule.SEND_COMMAND_FEEDBACK, false);
-        world.setGameRule(GameRule.ANNOUNCE_ADVANCEMENTS, false);
-        world.setGameRule(GameRule.DISABLE_ELYTRA_MOVEMENT_CHECK, false);
+        world.setGameRule(GameRules.FALL_DAMAGE, false);
+        world.setGameRule(GameRules.FIRE_DAMAGE, false);
+        world.setGameRule(GameRules.FREEZE_DAMAGE, false);
+        world.setGameRule(GameRules.KEEP_INVENTORY, true);
+        world.setGameRule(GameRules.IMMEDIATE_RESPAWN, true);
+        world.setGameRule(GameRules.REDUCED_DEBUG_INFO, true);
+        world.setGameRule(GameRules.SEND_COMMAND_FEEDBACK, false);
+        world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+        world.setGameRule(GameRules.ELYTRA_MOVEMENT_CHECK, true);
     }
 
     // =========================================================================
@@ -153,7 +158,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
         World world = getServer().getWorlds().getFirst();
         world.setDifficulty(Difficulty.EASY);
-        world.setGameRule(GameRule.DISABLE_RAIDS, false);
+        world.setGameRule(GameRules.RAIDS, true);
 
         // Set time to day
         world.setTime(1000);
@@ -271,7 +276,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         ItemStack elytra = new ItemStack(Material.ELYTRA);
         var meta = (Damageable) elytra.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName("§6Igel-Bingo Elytra");
+        meta.displayName(Component.text("Igel-Bingo Elytra", NamedTextColor.GOLD));
         meta.addEnchant(Enchantment.PROTECTION, 0, true);
         elytra.setItemMeta(meta);
         player.getInventory().setChestplate(elytra);
@@ -280,7 +285,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         ItemStack fireworks = new ItemStack(Material.FIREWORK_ROCKET, 64);
         FireworkMeta fwMeta = (FireworkMeta) fireworks.getItemMeta();
         fwMeta.setPower(3);
-        fwMeta.setDisplayName("§6Igel-Bingo Rakete");
+        fwMeta.displayName(Component.text("Igel-Bingo Rakete", NamedTextColor.GOLD));
         fireworks.setItemMeta(fwMeta);
         player.getInventory().addItem(fireworks);
 
@@ -340,7 +345,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         ItemStack elytra = new ItemStack(Material.ELYTRA);
         var meta = (Damageable) elytra.getItemMeta();
         meta.setUnbreakable(true);
-        meta.setDisplayName("§6Igel-Bingo Elytra");
+        meta.displayName(Component.text("Igel-Bingo Elytra", NamedTextColor.GOLD));
         elytra.setItemMeta(meta);
         player.getInventory().setChestplate(elytra);
     }
@@ -517,7 +522,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     }
 
     private void broadcast(String message) {
-        String colored = ChatColor.translateAlternateColorCodes('&', message);
-        getServer().broadcastMessage(colored);
+        Component component = LegacyComponentSerializer.legacyAmpersand().deserialize(message);
+        getServer().broadcast(component);
     }
 }

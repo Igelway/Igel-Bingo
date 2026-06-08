@@ -3,8 +3,8 @@ package de.igelbingo;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
@@ -109,26 +109,32 @@ public final class IgelBingoPlugin {
     }
 
     @Subscribe
-    public void onLogin(LoginEvent event) {
+    public void onServerPostConnect(ServerPostConnectEvent event) {
         if (!config.dockerMode || !config.lobbyAutoStart) return;
 
+        var player = event.getPlayer();
+        var serverName = event.getPreviousServer() != null
+                ? event.getPreviousServer().getServerInfo().getName()
+                : "limbo";
+
+        // Only redirect when player lands on limbo
+        if (!serverName.equals("limbo")) return;
+
+        // Use a short delay to let the connection stabilize
         proxy.getScheduler().buildTask(this, () -> {
             if (state == GameState.RUNNING) {
-                // Game is running, route directly to game
                 proxy.getServer("game").ifPresent(game -> {
-                    proxy.getAllPlayers().forEach(player -> {
-                        if (player.getCurrentServer().isEmpty() ||
-                                !player.getCurrentServer().get().getServerInfo().getName().equals("game")) {
-                            player.createConnectionRequest(game).fireAndForget();
-                        }
-                    });
+                    if (player.getCurrentServer().isEmpty()
+                            || !player.getCurrentServer().get().getServerInfo().getName().equals("game")) {
+                        player.createConnectionRequest(game).fireAndForget();
+                    }
                 });
                 return;
             }
 
             if (!dockerManager.isLobbyRunning()) {
                 dockerManager.startLobby();
-                event.getPlayer().sendMessage(
+                player.sendMessage(
                         net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
                                 .legacyAmpersand()
                                 .deserialize(lang.prefixed("lobby.starting"))
@@ -136,15 +142,17 @@ public final class IgelBingoPlugin {
 
                 dockerManager.waitForLobbyReady().thenAccept(ready -> {
                     if (ready) {
-                        commands.routePlayerToLobby(event.getPlayer());
+                        proxy.getServer("lobby").ifPresent(lobby ->
+                                player.createConnectionRequest(lobby).fireAndForget());
                         startLobbyIdleTimer();
                     }
                 });
             } else {
                 startLobbyIdleTimer();
-                commands.routePlayerToLobby(event.getPlayer());
+                proxy.getServer("lobby").ifPresent(lobby ->
+                        player.createConnectionRequest(lobby).fireAndForget());
             }
-        }).schedule();
+        }).delay(1, TimeUnit.SECONDS).schedule();
     }
 
     @Subscribe

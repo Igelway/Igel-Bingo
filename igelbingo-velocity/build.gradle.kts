@@ -4,11 +4,11 @@ plugins {
 }
 
 group = "de.igelbingo"
-version = "1.0.7"
+version = "1.0.8"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -18,11 +18,11 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
-    annotationProcessor("com.velocitypowered:velocity-api:3.4.0-SNAPSHOT")
+    compileOnly("com.velocitypowered:velocity-api:3.4.0")
+    annotationProcessor("com.velocitypowered:velocity-api:3.4.0")
     compileOnly("com.google.inject:guice:7.0.0")
 
-    implementation("org.yaml:snakeyaml:2.3")
+    implementation("org.yaml:snakeyaml:2.4")
 }
 
 tasks {
@@ -42,6 +42,6 @@ tasks {
 
     withType<JavaCompile> {
         options.encoding = "UTF-8"
-        options.release = 21
+        options.release = 25
     }
 }

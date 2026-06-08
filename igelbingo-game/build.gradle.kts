@@ -4,25 +4,22 @@ plugins {
 }
 
 group = "de.igelbingo"
-version = "1.0.7"
+version = "1.0.8"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
-    maven("https://repo.extendedclip.com/content/repositories/placeholderapi/")
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT")
-    compileOnly("me.clip:placeholderapi:2.12.2")
-
-    implementation("org.yaml:snakeyaml:2.3")
+    compileOnly("io.papermc.paper:paper-api:26.1.2.build.69-stable")
+    implementation("org.yaml:snakeyaml:2.4")
 }
 
 tasks {
@@ -38,6 +35,6 @@ tasks {
 
     withType<JavaCompile> {
         options.encoding = "UTF-8"
-        options.release = 21
+        options.release = 25
     }
 }
