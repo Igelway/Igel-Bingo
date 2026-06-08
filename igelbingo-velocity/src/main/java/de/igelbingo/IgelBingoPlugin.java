@@ -113,12 +113,12 @@ public final class IgelBingoPlugin {
         if (!config.dockerMode || !config.lobbyAutoStart) return;
 
         var player = event.getPlayer();
-        var serverName = event.getPreviousServer() != null
-                ? event.getPreviousServer().getServerInfo().getName()
-                : "limbo";
 
-        // Only redirect when player lands on limbo
-        if (!serverName.equals("limbo")) return;
+        // Only redirect when player comes from limbo, not from lobby/game
+        var prevName = event.getPreviousServer() != null
+                ? event.getPreviousServer().getServerInfo().getName()
+                : null;
+        if (!"limbo".equals(prevName)) return;
 
         // Use a short delay to let the connection stabilize
         proxy.getScheduler().buildTask(this, () -> {
@@ -129,6 +129,13 @@ public final class IgelBingoPlugin {
                         player.createConnectionRequest(game).fireAndForget();
                     }
                 });
+                return;
+            }
+
+            // Check if already on lobby — ServerPostConnectEvent fires once per connect
+            if (player.getCurrentServer().isPresent()
+                    && "lobby".equals(player.getCurrentServer().get().getServerInfo().getName())) {
+                startLobbyIdleTimer();
                 return;
             }
 
