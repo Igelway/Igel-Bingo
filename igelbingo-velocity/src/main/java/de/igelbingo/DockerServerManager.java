@@ -45,11 +45,7 @@ public final class DockerServerManager {
 
         String seed = currentSeed != null ? currentSeed : String.valueOf(System.currentTimeMillis());
 
-        String gameDataBase = config.gameDataDir;
-        if (!gameDataBase.startsWith("/")) {
-            gameDataBase = "/managed-data";
-        }
-        Path dataDir = Path.of(gameDataBase, "game");
+        Path dataDir = Path.of(config.gameDataDir, "game");
         try {
             Files.createDirectories(dataDir);
         } catch (IOException e) {

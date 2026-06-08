@@ -34,7 +34,6 @@ services:
       - forwarding_secret
     volumes:
       - ./data/velocity:/data
-      - ./data:/managed-data
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - igelbingo-network
@@ -63,9 +62,6 @@ services:
     container_name: igelbingo-lobby
     image: itzg/minecraft-server:latest
     restart: "no"
-    dns:
-      - 8.8.8.8
-      - 1.1.1.1
     environment:
       TYPE: PURPUR
       VERSION: "26.1.2"
