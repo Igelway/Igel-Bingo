@@ -58,6 +58,12 @@ public final class DockerServerManager {
             docker("pull", image);
         }
 
+        String forwardingSecret = "";
+        try {
+            forwardingSecret = new String(Files.readAllBytes(Path.of("/run/secrets/forwarding_secret"))).trim();
+        } catch (IOException ignored) {
+        }
+
         List<String> cmd = new ArrayList<>(List.of(
                 "run", "-d",
                 "--name", GAME_CONTAINER_NAME,
@@ -72,6 +78,11 @@ public final class DockerServerManager {
                 "-e", "ALLOW_FLIGHT=TRUE",
                 "-e", "LEVEL_SEED=" + seed
         ));
+
+        if (!forwardingSecret.isEmpty()) {
+            cmd.add("-e");
+            cmd.add("VELOCITY_SECRET=" + forwardingSecret);
+        }
 
         Set<String> forwardedKeys = new HashSet<>();
         System.getenv().forEach((key, value) -> {

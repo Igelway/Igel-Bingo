@@ -37,7 +37,13 @@ fi
 if [ -f "/run/secrets/forwarding_secret" ]; then
   SECRET=$(cat /run/secrets/forwarding_secret | tr -d '\n')
   export VELOCITY_SECRET="$SECRET"
+elif [ -n "${VELOCITY_SECRET:-}" ]; then
+  SECRET="$VELOCITY_SECRET"
+else
+  echo "WARNING: No forwarding secret found"
+fi
 
+if [ -n "$SECRET" ]; then
   mkdir -p /data/config
   cat > /data/config/paper-global.yml << PAPEREOF
 proxies:
@@ -47,8 +53,6 @@ proxies:
     secret: "${SECRET}"
 PAPEREOF
   echo "Velocity forwarding configured for Paper/Purpur."
-else
-  echo "WARNING: No forwarding secret found at /run/secrets/forwarding_secret"
 fi
 
 if [ -x "/opt/app-files/bac-filter.sh" ]; then
