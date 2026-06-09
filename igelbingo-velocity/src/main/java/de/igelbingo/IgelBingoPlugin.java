@@ -150,7 +150,7 @@ public final class IgelBingoPlugin {
             // Check if already on lobby — ServerPostConnectEvent fires once per connect
             if (player.getCurrentServer().isPresent()
                     && "lobby".equals(player.getCurrentServer().get().getServerInfo().getName())) {
-                startLobbyIdleTimer();
+                cancelLobbyIdleTimer();
                 return;
             }
 
@@ -166,11 +166,9 @@ public final class IgelBingoPlugin {
                     if (ready) {
                         proxy.getServer("lobby").ifPresent(lobby ->
                                 player.createConnectionRequest(lobby).fireAndForget());
-                        startLobbyIdleTimer();
                     }
                 });
             } else {
-                startLobbyIdleTimer();
                 proxy.getServer("lobby").ifPresent(lobby ->
                         player.createConnectionRequest(lobby).fireAndForget());
             }
@@ -179,6 +177,8 @@ public final class IgelBingoPlugin {
 
     @Subscribe
     public void onDisconnect(DisconnectEvent event) {
+        if (state == GameState.RUNNING) return;
+        if (hasPlayersOnLobby()) return;
         startLobbyIdleTimer();
     }
 
@@ -243,13 +243,18 @@ public final class IgelBingoPlugin {
     //    Lobby idle management
     // =========================================================================
 
+    private boolean hasPlayersOnLobby() {
+        return proxy.getServer("lobby")
+                .flatMap(s -> s.getPlayersConnected().stream().findAny())
+                .isPresent();
+    }
+
     public void startLobbyIdleTimer() {
         cancelLobbyIdleTimer();
         if (config.lobbyIdleTimeout <= 0) return;
 
-        lobbyIdleTask = scheduler.schedule(() -> {
-            checkLobbyIdle();
-        }, config.lobbyIdleTimeout, TimeUnit.SECONDS);
+        lobbyIdleTask = scheduler.schedule(this::stopLobbyIfIdle,
+                config.lobbyIdleTimeout, TimeUnit.SECONDS);
     }
 
     public void cancelLobbyIdleTimer() {
@@ -259,28 +264,23 @@ public final class IgelBingoPlugin {
         lobbyIdleTask = null;
     }
 
-    private void checkLobbyIdle() {
+    private void stopLobbyIfIdle() {
         if (state == GameState.RUNNING) return;
+        if (hasPlayersOnLobby()) return;
+        if (!dockerManager.isLobbyRunning()) return;
 
-        boolean hasPlayersOnLobby = proxy.getServer("lobby")
-                .flatMap(s -> s.getPlayersConnected().stream().findAny())
-                .isPresent();
+        dockerManager.stopLobby();
+        lobbyIdleTask = null;
+        logger.info("Lobby stopped due to inactivity");
 
-        if (!hasPlayersOnLobby && dockerManager.isLobbyRunning()) {
-            dockerManager.stopLobby();
-            cancelLobbyIdleTimer();
-            logger.info("Lobby stopped due to inactivity");
-
-            // Send remaining players (on limbo) to limbo
-            proxy.getServer("limbo").ifPresent(limbo -> {
-                proxy.getAllPlayers().forEach(player -> {
-                    if (player.getCurrentServer().isEmpty() ||
-                            !player.getCurrentServer().get().getServerInfo().getName().equals("limbo")) {
-                        player.createConnectionRequest(limbo).fireAndForget();
-                    }
-                });
+        proxy.getServer("limbo").ifPresent(limbo -> {
+            proxy.getAllPlayers().forEach(player -> {
+                if (player.getCurrentServer().isEmpty()
+                        || !player.getCurrentServer().get().getServerInfo().getName().equals("limbo")) {
+                    player.createConnectionRequest(limbo).fireAndForget();
+                }
             });
-        }
+        });
     }
 
     // =========================================================================
