@@ -77,6 +77,13 @@ public final class DockerServerManager {
             cmd.add("VELOCITY_SECRET=" + forwardingSecret);
         }
 
+        String puid = System.getenv().getOrDefault("PUID", "1000");
+        String pgid = System.getenv().getOrDefault("PGID", "1000");
+        cmd.add("-e");
+        cmd.add("PUID=" + puid);
+        cmd.add("-e");
+        cmd.add("PGID=" + pgid);
+
         Set<String> forwardedKeys = new HashSet<>();
         System.getenv().forEach((key, value) -> {
             if (key.startsWith("IGELBINGO_GAME_") && key.length() > 15) {
