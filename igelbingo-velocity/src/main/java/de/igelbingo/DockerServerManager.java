@@ -59,7 +59,7 @@ public final class DockerServerManager {
         }
 
         List<String> cmd = new ArrayList<>(List.of(
-                "docker", "run", "-d",
+                "run", "-d",
                 "--name", GAME_CONTAINER_NAME,
                 "--network", NETWORK_NAME,
                 "-v", dataDir.toAbsolutePath() + ":/data",
@@ -68,24 +68,22 @@ public final class DockerServerManager {
                 "-e", "VERSION=" + config.gameVersion,
                 "-e", "PURPUR_BUILD=" + config.purpurBuild,
                 "-e", "ONLINE_MODE=FALSE",
-                "-e", "DIFFICULTY=" + config.gameDifficulty,
-                "-e", "VIEW_DISTANCE=" + config.gameViewDistance,
-                "-e", "MAX_PLAYERS=" + config.gameMaxPlayers,
-                "-e", "MEMORY=" + config.gameMemory,
                 "-e", "SPAWN_PROTECTION=0",
                 "-e", "ALLOW_FLIGHT=TRUE",
                 "-e", "LEVEL_SEED=" + seed
         ));
 
-        // Forward IGELBINGO_GAME_* env vars
+        Set<String> forwardedKeys = new HashSet<>();
         System.getenv().forEach((key, value) -> {
             if (key.startsWith("IGELBINGO_GAME_") && key.length() > 15) {
+                String itzgKey = key.substring(15);
                 cmd.add("-e");
-                cmd.add(key.substring(15) + "=" + value);
+                cmd.add(itzgKey + "=" + value);
+                forwardedKeys.add(itzgKey);
             }
         });
 
-        if (!config.gameOps.isEmpty()) {
+        if (!config.gameOps.isEmpty() && !forwardedKeys.contains("OPS")) {
             cmd.add("-e");
             cmd.add("OPS=" + String.join(",", config.gameOps));
         }
@@ -117,11 +115,8 @@ public final class DockerServerManager {
             return future;
         }
 
-        long start = System.currentTimeMillis();
-        long timeout = 120_000;
-
         Thread thread = new Thread(() -> {
-            while (System.currentTimeMillis() - start < timeout) {
+            while (!future.isDone()) {
                 try {
                     String state = dockerInspect(GAME_CONTAINER_NAME, "State.Running");
                     if ("true".equals(state)) {
@@ -142,7 +137,6 @@ public final class DockerServerManager {
                     return;
                 }
             }
-            future.complete(false);
         });
         thread.setDaemon(true);
         thread.start();
@@ -153,12 +147,8 @@ public final class DockerServerManager {
     public CompletableFuture<Boolean> waitForChunkyReady() {
         chunkyReadyFuture = new CompletableFuture<>();
 
-        long start = System.currentTimeMillis();
-        long timeout = 600_000;
-
         Thread thread = new Thread(() -> {
-            while (System.currentTimeMillis() - start < timeout) {
-                if (chunkyReadyFuture.isDone()) return;
+            while (!chunkyReadyFuture.isDone()) {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
@@ -168,10 +158,6 @@ public final class DockerServerManager {
                     }
                     return;
                 }
-            }
-            if (!chunkyReadyFuture.isDone()) {
-                logger.warning("Chunky preload timed out after 10 minutes");
-                chunkyReadyFuture.complete(false);
             }
         });
         thread.setDaemon(true);
