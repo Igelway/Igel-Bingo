@@ -179,7 +179,7 @@ public final class IgelBingoPlugin {
 
     @Subscribe
     public void onDisconnect(DisconnectEvent event) {
-        checkLobbyIdle();
+        startLobbyIdleTimer();
     }
 
     @Subscribe
