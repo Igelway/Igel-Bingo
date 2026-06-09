@@ -45,13 +45,6 @@ public final class DockerServerManager {
 
         String seed = currentSeed != null ? currentSeed : String.valueOf(System.currentTimeMillis());
 
-        Path dataDir = Path.of(config.gameDataDir, "game");
-        try {
-            Files.createDirectories(dataDir);
-        } catch (IOException e) {
-            logger.severe("Failed to create game data directory: " + e.getMessage());
-        }
-
         String image = config.gameserverImage;
 
         if (config.pullGameImage) {
@@ -68,7 +61,7 @@ public final class DockerServerManager {
                 "run", "-d",
                 "--name", GAME_CONTAINER_NAME,
                 "--network", NETWORK_NAME,
-                "-v", dataDir.toAbsolutePath() + ":/data",
+                "-v", "igelbingo-game-data:/data",
                 "-e", "EULA=TRUE",
                 "-e", "TYPE=PURPUR",
                 "-e", "VERSION=" + config.gameVersion,
@@ -203,8 +196,7 @@ public final class DockerServerManager {
     }
 
     public void cleanupGameData() {
-        Path dataDir = Path.of(config.gameDataDir, "game");
-        deleteRecursively(dataDir);
+        docker("volume", "rm", "-f", "igelbingo-game-data");
     }
 
     public void setSeed(String seed) {
@@ -327,20 +319,6 @@ public final class DockerServerManager {
     }
 
     // =========================================================================
-    //    Helpers
-    // =========================================================================
-
-    private void deleteRecursively(Path path) {
-        try {
-            if (Files.isDirectory(path)) {
-                try (var entries = Files.list(path)) {
-                    entries.forEach(this::deleteRecursively);
-                }
-            }
-            Files.deleteIfExists(path);
-        } catch (IOException ignored) {
-        }
-    }
 
     public void close() {
     }
