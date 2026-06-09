@@ -34,7 +34,7 @@ public final class IgelBingoCommands implements SimpleCommand {
             return;
         }
 
-        if (!checkPermission(invocation)) {
+        if (!hasPermission(invocation)) {
             source.sendMessage(deserialize(lang.prefixed("no-permission")));
             return;
         }
@@ -229,10 +229,6 @@ public final class IgelBingoCommands implements SimpleCommand {
             return true;
         }
         return invocation.source().hasPermission("igelbingo.admin");
-    }
-
-    private boolean checkPermission(Invocation invocation) {
-        return hasPermission(invocation);
     }
 
     private Component deserialize(String text) {

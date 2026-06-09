@@ -2,8 +2,6 @@
 
 Docker-based Bingo server system with Velocity proxy, NanoLimbo, and on-demand Purpur game servers.
 
-Built for Minecraft 26.1.2 (Purpur) with [BingoReloaded](https://github.com/Steaf23/BingoReloaded) and [BlazeandCave's Advancements Pack](https://modrinth.com/datapack/blazeandcaves-advancements-pack).
-
 ## Components
 
 | Container | Description |

@@ -346,6 +346,5 @@ public final class DockerServerManager {
     }
 
     public void close() {
-        // no cleanup needed for CLI mode
     }
 }

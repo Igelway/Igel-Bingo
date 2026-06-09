@@ -20,23 +20,17 @@ hs_err_pid*
 .vscode/
 *.swp
 *.swo
-*.swn
-*~
 
-# Docker data (runtime, not committed)
+# Docker data
 data/
 
-# Secrets (NEVER commit)
+# Secrets
 .forwarding.secret
 .playit.secret
-*.pem
-*.key
-*.crt
 
 # Environment
 .env
 *.env.local
-*.env.prod
 
 # Logs
 *.log
@@ -46,10 +40,3 @@ crash-reports/
 # OS
 .DS_Store
 Thumbs.db
-desktop.ini
-__MACOSX/
-
-# Zip/tar (accidental archives)
-*.zip
-*.tar.gz
-*.tgz

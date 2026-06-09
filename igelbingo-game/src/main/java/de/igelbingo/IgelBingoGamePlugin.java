@@ -375,15 +375,9 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     //    BAC Silencing
     // =========================================================================
 
-    /**
-     * Disables BAC advancement toasts, sounds, chat announcements and rewards.
-     * With 1000+ advancements, these would be overwhelming during Bingo gameplay.
-     * BAC tracks completions internally — BingoReloaded reads them via the API.
-     */
     private void suppressBacNotifications() {
         ConsoleCommandSender console = getServer().getConsoleSender();
 
-        // Disable all advancement type toasts
         dispatchSilently(console, "function blazeandcave:config/msg_task_off");
         dispatchSilently(console, "function blazeandcave:config/msg_goal_off");
         dispatchSilently(console, "function blazeandcave:config/msg_challenge_off");
@@ -393,10 +387,8 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         dispatchSilently(console, "function blazeandcave:config/msg_set_server1");
         dispatchSilently(console, "function blazeandcave:config/msg_set_vanilla_msg");
 
-        // Disable intro welcome message
         dispatchSilently(console, "function blazeandcave:config/intro_msg_off");
 
-        // Disable trophies, item and XP rewards
         dispatchSilently(console, "function blazeandcave:config/trophies_off");
         dispatchSilently(console, "function blazeandcave:config/item_rewards_off");
         dispatchSilently(console, "function blazeandcave:config/exp_rewards_off");
@@ -405,11 +397,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     }
 
     private void dispatchSilently(ConsoleCommandSender console, String command) {
-        try {
-            getServer().dispatchCommand(console, command);
-        } catch (Exception e) {
-            getLogger().warning("Failed to run BAC config: " + command + " — " + e.getMessage());
-        }
+        getServer().dispatchCommand(console, command);
     }
 
     // =========================================================================

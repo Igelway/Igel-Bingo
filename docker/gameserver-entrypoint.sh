@@ -30,21 +30,14 @@ create_symlinks() {
 
 create_symlinks "/opt/app-files/plugins" "/data/plugins"
 
-# === Permissions ===
-# The /data volume may be owned by root from initial docker-compose mount.
-# Fix ownership before itzg/start switches to the minecraft user.
 if [ "$(id -u)" -eq 0 ]; then
   chown -R minecraft:minecraft /data 2>/dev/null || true
 fi
 
-# === Forwarding Secret ===
-# Paper/Purpur needs the secret in its config for Velocity modern forwarding.
-# Docker secrets are mounted as files, so we read the file and write the config.
 if [ -f "/run/secrets/forwarding_secret" ]; then
-  SECRET=$(cat /run/secrets/forwarding_secret)
+  SECRET=$(cat /run/secrets/forwarding_secret | tr -d '\n')
   export VELOCITY_SECRET="$SECRET"
 
-  # Write velocity config for Paper/Purpur
   mkdir -p /data/config
   cat > /data/config/paper-global.yml << PAPEREOF
 proxies:
@@ -58,17 +51,11 @@ else
   echo "WARNING: No forwarding secret found at /run/secrets/forwarding_secret"
 fi
 
-# === BAC Filter ===
-# Downloads and filters BlazeandCave's Advancements Pack at runtime.
-# BAC is NOT bundled in the image (license compliance).
-# Only advancement files are kept (everything else is removed).
 if [ -x "/opt/app-files/bac-filter.sh" ]; then
   echo "Running BAC filter to download and install advancements..."
   /opt/app-files/bac-filter.sh /data/world/datapacks/BAC_Filtered
 fi
 
-# === BingoReloaded Config ===
-# Ensure BingoReloaded has the correct hooks set
 mkdir -p /data/plugins/BingoReloaded
 if [ ! -f "/data/plugins/BingoReloaded/config.yml" ]; then
   echo "Installing default BingoReloaded config with IgelBingo hooks..."

@@ -3,7 +3,7 @@ set -e
 
 SECRET_FILE="${SECRET_FILE:-/run/secrets/forwarding_secret}"
 if [ -f "$SECRET_FILE" ]; then
-    SECRET=$(cat "$SECRET_FILE")
+    SECRET=$(cat "$SECRET_FILE" | tr -d '\n')
 else
     SECRET="${FORWARDING_SECRET:-change_me}"
 fi

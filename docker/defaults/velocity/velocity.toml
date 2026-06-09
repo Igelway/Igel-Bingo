@@ -38,7 +38,7 @@ ping-passthrough = "DISABLED"
 enable-player-address-logging = true
 
 [servers]
-# Docker Compose service names as addresses (resolved via Docker internal DNS)
+# Docker Compose service names as addresses
 lobby = "lobby:25565"
 game = "game:25565"
 limbo = "limbo:25565"
