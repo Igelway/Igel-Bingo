@@ -77,10 +77,12 @@ services:
       PGID: ${PGID:-1000}
     secrets:
       - forwarding_secret
-    entrypoint: ["sh", "/lobby-entrypoint.sh"]
+    entrypoint:
+      - "sh"
+      - "-c"
+      - "export VELOCITY_SECRET=$$(cat /run/secrets/forwarding_secret 2>/dev/null || echo '') && exec /start"
     volumes:
       - ./data/lobby:/data
-      - ./docker/lobby-entrypoint.sh:/lobby-entrypoint.sh
     ports: []
     networks:
       - igelbingo-network
