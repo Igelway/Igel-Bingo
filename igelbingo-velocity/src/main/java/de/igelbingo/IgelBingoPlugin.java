@@ -73,16 +73,6 @@ public final class IgelBingoPlugin {
                 commands
         );
 
-        // Initially stop lobby - it starts when first player joins
-        if (config.dockerMode && config.lobbyAutoStart) {
-            proxy.getScheduler().buildTask(this, () -> {
-                if (dockerManager.isLobbyRunning()) {
-                    dockerManager.stopLobby();
-                    logger.info("Initial lobby stop (waiting for first player)");
-                }
-            }).delay(3, TimeUnit.SECONDS).schedule();
-        }
-
         logger.info("IgelBingo Velocity Plugin ready.");
     }
 
