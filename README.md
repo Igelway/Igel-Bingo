@@ -58,7 +58,7 @@ Player → Velocity (25565) → Limbo   (always running)
 ```
 
 - **Igel-Bingo Velocity Plugin**: Docker orchestration, player routing, admin commands
-- **Igel-Bingo Game Plugin** (Paper): Countdown, starter kit (elytra + fireworks), game rules, world setup (replaces the bingo_purpur datapack)
+- **Igel-Bingo Game Plugin** (Paper): Countdown, starter kit (elytra + fireworks), game rules, world setup
 - **BingoReloaded**: Core game logic (cards, teams, voting) — connected via config hooks
 
 ## BingoReloaded Integration
