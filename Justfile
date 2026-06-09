@@ -60,7 +60,6 @@ up _profile="":
 down:
     @echo "Stopping Igel-Bingo..."
     docker rm -f igelbingo-game 2>/dev/null || true
-    docker volume rm -f igelbingo-game-data 2>/dev/null || true
     docker compose down --remove-orphans
 
 restart _profile="":

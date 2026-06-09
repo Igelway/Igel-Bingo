@@ -61,7 +61,7 @@ public final class DockerServerManager {
                 "run", "-d",
                 "--name", GAME_CONTAINER_NAME,
                 "--network", NETWORK_NAME,
-                "-v", "igelbingo-game-data:/data",
+                "--tmpfs", "/data:uid=1000,gid=1000",
                 "-e", "EULA=TRUE",
                 "-e", "TYPE=PURPUR",
                 "-e", "VERSION=" + config.gameVersion,
@@ -203,7 +203,6 @@ public final class DockerServerManager {
     }
 
     public void cleanupGameData() {
-        docker("volume", "rm", "-f", "igelbingo-game-data");
     }
 
     public void setSeed(String seed) {
