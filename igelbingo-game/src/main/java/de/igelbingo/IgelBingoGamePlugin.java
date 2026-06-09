@@ -19,9 +19,6 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
-import org.popcraft.chunky.api.ChunkyAPI;
-import org.popcraft.chunky.api.event.task.GenerationCompleteEvent;
-
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
@@ -514,48 +511,68 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     // =========================================================================
 
     private void startChunkyPreload() {
-        ChunkyAPI chunky = getServer().getServicesManager().load(ChunkyAPI.class);
-        if (chunky == null) {
-            getLogger().warning("Chunky API not available — is Chunky installed?");
-            sendPluginMessage("chunky_done");
-            return;
-        }
-
-        int owRadius = envInt("IGELBINGO_CHUNKY_OW_RADIUS", 5000);
-        int netherRadius = envInt("IGELBINGO_CHUNKY_NETHER_RADIUS", 2000);
-        int endRadius = envInt("IGELBINGO_CHUNKY_END_RADIUS", 2000);
-
-        int[] completed = {0};
-        int[] started = {0};
-
-        chunky.onGenerationComplete((GenerationCompleteEvent event) -> {
-            completed[0]++;
-            getLogger().info("Chunky generation complete for " + event.world()
-                    + " (" + completed[0] + "/" + started[0] + ")");
-            if (completed[0] >= started[0]) {
-                getLogger().info("All Chunky preload tasks complete!");
+        try {
+            Class<?> chunkyApiClass = Class.forName("org.popcraft.chunky.api.ChunkyAPI");
+            Object chunky = getServer().getServicesManager().load(chunkyApiClass);
+            if (chunky == null) {
+                getLogger().warning("Chunky not installed — skipping preload");
                 sendPluginMessage("chunky_done");
+                return;
             }
-        });
 
-        World overworld = getServer().getWorlds().getFirst();
-        chunky.startTask(overworld.getName(), "square", 0, 0, owRadius, owRadius, "concentric");
-        started[0]++;
+            int owRadius = envInt("IGELBINGO_CHUNKY_OW_RADIUS", 5000);
+            int netherRadius = envInt("IGELBINGO_CHUNKY_NETHER_RADIUS", 2000);
+            int endRadius = envInt("IGELBINGO_CHUNKY_END_RADIUS", 2000);
 
-        World nether = getServer().getWorld(overworld.getName() + "_nether");
-        if (nether != null) {
-            chunky.startTask(nether.getName(), "square", 0, 0, netherRadius, netherRadius, "concentric");
+            int[] completed = {0};
+            int[] started = {0};
+
+            Class<?> genEventClass = Class.forName("org.popcraft.chunky.api.event.task.GenerationCompleteEvent");
+            java.lang.reflect.Method onCompleteMethod = chunkyApiClass.getMethod("onGenerationComplete", java.util.function.Consumer.class);
+            onCompleteMethod.invoke(chunky, (java.util.function.Consumer<Object>) event -> {
+                completed[0]++;
+                try {
+                    java.lang.reflect.Method worldMethod = genEventClass.getMethod("world");
+                    String world = (String) worldMethod.invoke(event);
+                    getLogger().info("Chunky generation complete for " + world
+                            + " (" + completed[0] + "/" + started[0] + ")");
+                } catch (Exception e) {
+                    getLogger().warning("Failed to get Chunky world name: " + e.getMessage());
+                }
+                if (completed[0] >= started[0]) {
+                    getLogger().info("All Chunky preload tasks complete!");
+                    sendPluginMessage("chunky_done");
+                }
+            });
+
+            java.lang.reflect.Method startTaskMethod = chunkyApiClass.getMethod(
+                    "startTask", String.class, String.class, int.class, int.class, int.class, int.class, String.class);
+
+            World overworld = getServer().getWorlds().getFirst();
+            startTaskMethod.invoke(chunky, overworld.getName(), "square", 0, 0, owRadius, owRadius, "concentric");
             started[0]++;
-        }
 
-        World end = getServer().getWorld(overworld.getName() + "_the_end");
-        if (end != null) {
-            chunky.startTask(end.getName(), "square", 0, 0, endRadius, endRadius, "concentric");
-            started[0]++;
-        }
+            World nether = getServer().getWorld(overworld.getName() + "_nether");
+            if (nether != null) {
+                startTaskMethod.invoke(chunky, nether.getName(), "square", 0, 0, netherRadius, netherRadius, "concentric");
+                started[0]++;
+            }
 
-        getLogger().info("Chunky preload started for " + started[0] + " worlds"
-                + " (ow=" + owRadius + ", nether=" + netherRadius + ", end=" + endRadius + ")");
+            World end = getServer().getWorld(overworld.getName() + "_the_end");
+            if (end != null) {
+                startTaskMethod.invoke(chunky, end.getName(), "square", 0, 0, endRadius, endRadius, "concentric");
+                started[0]++;
+            }
+
+            getLogger().info("Chunky preload started for " + started[0] + " worlds"
+                    + " (ow=" + owRadius + ", nether=" + netherRadius + ", end=" + endRadius + ")");
+        } catch (ClassNotFoundException e) {
+            getLogger().warning("Chunky not installed — skipping preload");
+            sendPluginMessage("chunky_done");
+        } catch (Exception e) {
+            getLogger().severe("Failed to start Chunky preload: " + e.getMessage());
+            sendPluginMessage("chunky_done");
+        }
     }
 
     private int envInt(String key, int def) {
