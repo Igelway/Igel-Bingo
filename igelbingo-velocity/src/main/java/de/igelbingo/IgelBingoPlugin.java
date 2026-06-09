@@ -135,11 +135,9 @@ public final class IgelBingoPlugin {
 
         var player = event.getPlayer();
 
-        // Only redirect when player comes from limbo, not from lobby/game
-        var prevName = event.getPreviousServer() != null
-                ? event.getPreviousServer().getServerInfo().getName()
-                : null;
-        if (!"limbo".equals(prevName)) return;
+        // Only redirect when player is on limbo
+        if (player.getCurrentServer().isEmpty()) return;
+        if (!"limbo".equals(player.getCurrentServer().get().getServerInfo().getName())) return;
 
         // Use a short delay to let the connection stabilize
         proxy.getScheduler().buildTask(this, () -> {
