@@ -40,7 +40,7 @@ enable-player-address-logging = true
 [servers]
 # Docker Compose service names as addresses
 lobby = "lobby:25565"
-game = "game:25565"
+game = "igelbingo-game:25565"
 limbo = "limbo:25565"
 
 # Order to try servers when a player connects
