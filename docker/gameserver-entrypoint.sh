@@ -30,10 +30,6 @@ create_symlinks() {
 
 create_symlinks "/opt/app-files/plugins" "/data/plugins"
 
-if [ "$(id -u)" -eq 0 ]; then
-  chown -R minecraft:minecraft /data 2>/dev/null || true
-fi
-
 if [ -f "/run/secrets/forwarding_secret" ]; then
   SECRET=$(cat /run/secrets/forwarding_secret | tr -d '\n')
   export VELOCITY_SECRET="$SECRET"
@@ -139,6 +135,10 @@ GoUpWand:
   cooldown: 2.0
   platformLifetime: 10
 CONFEOF
+fi
+
+if [ "$(id -u)" -eq 0 ]; then
+  chown -R minecraft:minecraft /data 2>/dev/null || true
 fi
 
 echo "Starting Minecraft server..."
