@@ -207,20 +207,10 @@ public final class IgelBingoPlugin {
     private void handleGameEnded() {
         if (state != GameState.RUNNING) return;
 
-        broadcast(lang.prefixed("game.stopping"));
-        state = GameState.STOPPING;
-
-        routeAllToLobby();
-
-        dockerManager.stopGameServer();
-        dockerManager.removeOldGameContainers();
-
-        if (config.lobbyAutoStart && !dockerManager.isLobbyRunning()) {
-            dockerManager.startLobby();
-        }
-
+        broadcast(lang.prefixed("game.ended"));
         state = GameState.IDLE;
-        broadcast(lang.prefixed("game.stopped"));
+
+        // Don't route players — they stay on game server until /ib stop
     }
 
     private void routeAllToLobby() {

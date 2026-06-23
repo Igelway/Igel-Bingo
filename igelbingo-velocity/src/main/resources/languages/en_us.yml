@@ -16,6 +16,7 @@ game:
   not-running: "&cNo game is running."
   stopping: "&eStopping game..."
   stopped: "&aGame stopped. Cleaning up servers."
+  ended: "&eBingo ended! Use &c/ib stop &eto shut down the server."
   state: "&eStatus: {state}"
   server-ready: "&aBingo server ready in {time} seconds."
 

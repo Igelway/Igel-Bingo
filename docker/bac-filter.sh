@@ -44,6 +44,21 @@ if [ -d "$WORK_DIR/extracted/data/blazeandcave/advancement" ]; then
     cp -r "$WORK_DIR/extracted/data/blazeandcave/advancement" "$BAC_DATAPACK_DIR/data/blazeandcave/"
 fi
 
+if [ -d "$WORK_DIR/extracted/data/blazeandcave/tags" ]; then
+    mkdir -p "$BAC_DATAPACK_DIR/data/blazeandcave"
+    cp -r "$WORK_DIR/extracted/data/blazeandcave/tags" "$BAC_DATAPACK_DIR/data/blazeandcave/"
+fi
+
+if [ -d "$WORK_DIR/extracted/data/blazeandcave/function" ]; then
+    mkdir -p "$BAC_DATAPACK_DIR/data/blazeandcave"
+    cp -r "$WORK_DIR/extracted/data/blazeandcave/function" "$BAC_DATAPACK_DIR/data/blazeandcave/"
+fi
+
+if [ -d "$WORK_DIR/extracted/data/blazeandcave/predicate" ]; then
+    mkdir -p "$BAC_DATAPACK_DIR/data/blazeandcave"
+    cp -r "$WORK_DIR/extracted/data/blazeandcave/predicate" "$BAC_DATAPACK_DIR/data/blazeandcave/"
+fi
+
 if [ -d "$WORK_DIR/extracted/data/blazeandcave/msg" ]; then
     mkdir -p "$BAC_DATAPACK_DIR/data/blazeandcave"
     cp -r "$WORK_DIR/extracted/data/blazeandcave/msg" "$BAC_DATAPACK_DIR/data/blazeandcave/"

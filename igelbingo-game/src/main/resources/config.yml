@@ -10,5 +10,5 @@ worldborder-nether: 4000
 worldborder-end: 8000
 
 # Elytra and firework replenish settings
-elytra-replenish-interval: 30  # seconds between firework replenish
-elytra-replenish-amount: 3     # fireworks given per replenish
+elytra-replenish-interval: 8   # seconds between firework replenish
+elytra-replenish-amount: 64    # fireworks given per replenish (capped at 64 in slot 4)

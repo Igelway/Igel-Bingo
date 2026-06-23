@@ -28,9 +28,17 @@ RUN chmod +x /tmp/download-plugins.sh && /tmp/download-plugins.sh /opt/app-files
 # Copy IgelBingo Game Plugin
 COPY igelbingo-game/build/libs/igelbingo-purpur-plugin.jar /opt/app-files/plugins/
 
-# Copy BAC filter script
-COPY docker/bac-filter.sh /opt/app-files/bac-filter.sh
-RUN chmod +x /opt/app-files/bac-filter.sh
+# Copy Bingo data files
+COPY docker/game-data/ /opt/app-files/game-data/
+
+# Copy lobby datapack
+COPY docker/lobby-datapack/ /opt/app-files/lobby-datapack/
+
+# Copy bingo_purpur datapack (game flow)
+COPY docker/bingo-datapack/ /opt/app-files/bingo-datapack/
+
+# Copy BAC datapack (advancements for bingo tasks)
+COPY docker/bac-datapack/ /opt/app-files/bac-datapack/
 
 # Copy entrypoint
 COPY docker/gameserver-entrypoint.sh /gameserver-entrypoint.sh

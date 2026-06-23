@@ -51,15 +51,34 @@ PAPEREOF
   echo "Velocity forwarding configured for Paper/Purpur."
 fi
 
-if [ -x "/opt/app-files/bac-filter.sh" ]; then
-  echo "Running BAC filter to download and install advancements..."
-  /opt/app-files/bac-filter.sh /data/world/datapacks/BAC_Filtered
+if [ -d "/opt/app-files/lobby-datapack" ]; then
+  mkdir -p /data/world/datapacks
+  cp -r /opt/app-files/lobby-datapack /data/world/datapacks/lobby
+  echo "Lobby datapack installed."
+fi
+
+if [ -d "/opt/app-files/bingo-datapack" ]; then
+  mkdir -p /data/world/datapacks
+  cp -r /opt/app-files/bingo-datapack /data/world/datapacks/bingo_purpur
+  echo "Bingo datapack installed."
+fi
+
+# Install bundled BAC datapack (same version as original server)
+if [ -d "/opt/app-files/bac-datapack" ]; then
+  mkdir -p /data/world/datapacks
+  cp -r /opt/app-files/bac-datapack /data/world/datapacks/BAC
+  echo "BAC datapack installed."
+fi
+
+if [ -d "/opt/app-files/game-data" ]; then
+  mkdir -p /data/plugins/BingoReloaded/data
+  cp /opt/app-files/game-data/*.nbt /data/plugins/BingoReloaded/data/
+  echo "Bingo data files installed."
 fi
 
 mkdir -p /data/plugins/BingoReloaded
-if [ ! -f "/data/plugins/BingoReloaded/config.yml" ]; then
-  echo "Installing default BingoReloaded config with IgelBingo hooks..."
-  cat > /data/plugins/BingoReloaded/config.yml << 'CONFEOF'
+echo "Installing BingoReloaded config with IgelBingo hooks..."
+cat > /data/plugins/BingoReloaded/config.yml << 'CONFEOF'
 version: 3.4.2
 configuration: SINGULAR
 defaultWorldName: world
@@ -83,7 +102,7 @@ playerWaitTime: 50
 gameRestartTime: 30
 useVoteSystem: false
 preventPlayerGriefing: false
-startingCountdownTime: 0
+startingCountdownTime: 30
 teleportMaxDistance: 0
 playerTeleportStrategy: NONE
 teleportBackAfterDeathMessage: false
@@ -134,8 +153,11 @@ GoUpWand:
   downDistance: 25
   cooldown: 2.0
   platformLifetime: 10
+defaultWorlds:
+- bingo_world
+clearDefaultWorlds: true
+customWorldGeneration: ''
 CONFEOF
-fi
 
 if [ "$(id -u)" -eq 0 ]; then
   chown -R minecraft:minecraft /data 2>/dev/null || true

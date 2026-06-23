@@ -24,6 +24,7 @@ public final class DockerServerManager {
     private final Logger logger;
 
     private String currentSeed;
+    private volatile boolean chunkyAlreadyDone = false;
     private CompletableFuture<Boolean> chunkyReadyFuture;
 
     public DockerServerManager(PluginConfig config, ProxyServer proxy, Logger logger) {
@@ -41,6 +42,7 @@ public final class DockerServerManager {
     // =========================================================================
 
     public void createGameServer(boolean withChunky) {
+        chunkyAlreadyDone = false;
         removeOldGameContainers();
 
         String seed = currentSeed != null ? currentSeed : String.valueOf(System.currentTimeMillis());
@@ -88,6 +90,7 @@ public final class DockerServerManager {
         System.getenv().forEach((key, value) -> {
             if (key.startsWith("IGELBINGO_GAME_") && key.length() > 15) {
                 String itzgKey = key.substring(15);
+                if ("MAX_PLAYERS".equals(itzgKey) && "-1".equals(value)) return;
                 cmd.add("-e");
                 cmd.add(itzgKey + "=" + value);
                 forwardedKeys.add(itzgKey);
@@ -97,6 +100,13 @@ public final class DockerServerManager {
         if (!config.gameOps.isEmpty() && !forwardedKeys.contains("OPS")) {
             cmd.add("-e");
             cmd.add("OPS=" + String.join(",", config.gameOps));
+        }
+
+        String resourcePack = System.getenv("IGELBINGO_RESOURCE_PACK");
+        if (resourcePack != null && !resourcePack.isEmpty()) {
+            cmd.add("-e");
+            cmd.add("RESOURCE_PACK=" + resourcePack);
+            forwardedKeys.add("RESOURCE_PACK");
         }
 
         if (withChunky) {
@@ -156,6 +166,10 @@ public final class DockerServerManager {
     }
 
     public CompletableFuture<Boolean> waitForChunkyReady() {
+        if (chunkyAlreadyDone) {
+            return CompletableFuture.completedFuture(true);
+        }
+
         chunkyReadyFuture = new CompletableFuture<>();
 
         Thread thread = new Thread(() -> {
@@ -178,6 +192,7 @@ public final class DockerServerManager {
     }
 
     public void onChunkyDone() {
+        chunkyAlreadyDone = true;
         if (chunkyReadyFuture != null && !chunkyReadyFuture.isDone()) {
             chunkyReadyFuture.complete(true);
             logger.info("Chunky preload completed (signal from game plugin)");

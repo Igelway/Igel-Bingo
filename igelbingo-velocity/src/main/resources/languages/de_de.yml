@@ -16,6 +16,7 @@ game:
   not-running: "&cKein Spiel läuft."
   stopping: "&eSpiel wird beendet..."
   stopped: "&aSpiel beendet. Server werden aufgeräumt."
+  ended: "&eBingo beendet! Nutze &c/ib stop &eum den Server herunterzufahren."
   state: "&eStatus: {state}"
   server-ready: "&aBingo-Server ist bereit in {time} Sekunden."
 

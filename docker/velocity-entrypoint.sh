@@ -72,7 +72,7 @@ fi
 JAVA_BIN="${JAVA_HOME:-/opt/java/openjdk}/bin/java"
 cd /data
 if [ "$(id -u)" -eq 0 ]; then
-  exec su -s /bin/sh minecraft -c "exec \"$JAVA_BIN\" -Xms1G -Xmx1G -jar /data/velocity.jar"
+  exec /usr/sbin/runuser -u minecraft -- "$JAVA_BIN" -Xms1G -Xmx1G -jar /data/velocity.jar
 else
   exec "${JAVA_BIN}" -Xms1G -Xmx1G -jar /data/velocity.jar
 fi

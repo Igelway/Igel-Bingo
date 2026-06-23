@@ -7,6 +7,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public final class IgelBingoCommands implements SimpleCommand {
 
@@ -51,6 +52,12 @@ public final class IgelBingoCommands implements SimpleCommand {
     }
 
     private void handleStart(String[] args) {
+        if (plugin.getState() == GameState.RUNNING) {
+            routeAllToGame();
+            broadcast(lang.prefixed("game.started"));
+            return;
+        }
+
         if (plugin.getState() != GameState.IDLE) {
             broadcast(lang.prefixed("game.already-running"));
             return;
@@ -66,10 +73,6 @@ public final class IgelBingoCommands implements SimpleCommand {
         }
 
         boolean withChunky = config.chunkyPreload && !clean;
-
-        if (config.lobbyStopOnGame) {
-            docker.stopLobby();
-        }
 
         docker.createGameServer(withChunky);
 
@@ -91,11 +94,13 @@ public final class IgelBingoCommands implements SimpleCommand {
                     plugin.setState(GameState.RUNNING);
                     routeAllToGame();
                     broadcast(lang.prefixed("game.started"));
+                    if (config.lobbyStopOnGame) delayStopLobby();
                 });
             } else {
                 plugin.setState(GameState.RUNNING);
                 routeAllToGame();
                 broadcast(lang.prefixed("game.started"));
+                if (config.lobbyStopOnGame) delayStopLobby();
             }
         });
     }
@@ -106,30 +111,38 @@ public final class IgelBingoCommands implements SimpleCommand {
             return;
         }
 
+        boolean withChunky = config.chunkyPreload;
+
         plugin.setState(GameState.PREPARING);
 
         if (args.length > 1) {
             docker.setSeed(args[1]);
         }
 
-        broadcast(lang.prefixed("prepare.starting"));
-        docker.createGameServer(true);
+        broadcast(lang.prefixed(withChunky ? "prepare.starting" : "game.starting"));
+        docker.createGameServer(withChunky);
 
         docker.waitForServerReady().thenAccept(ready -> {
             if (!ready) {
-                broadcast(lang.prefixed("prepare.start-failed"));
+                broadcast(lang.prefixed(withChunky ? "prepare.start-failed" : "game.start-failed"));
                 plugin.setState(GameState.IDLE);
                 return;
             }
-            broadcast(lang.prefixed("prepare.chunky-running", "progress", "0"));
-            docker.waitForChunkyReady().thenAccept(chunkyDone -> {
-                if (chunkyDone) {
-                    broadcast(lang.prefixed("prepare.chunky-done"));
-                } else {
-                    broadcast(lang.prefixed("prepare.chunky-timeout"));
-                }
+
+            if (withChunky) {
+                broadcast(lang.prefixed("prepare.chunky-running", "progress", "0"));
+                docker.waitForChunkyReady().thenAccept(chunkyDone -> {
+                    if (chunkyDone) {
+                        broadcast(lang.prefixed("prepare.chunky-done"));
+                    } else {
+                        broadcast(lang.prefixed("prepare.chunky-timeout"));
+                    }
+                    plugin.setState(GameState.RUNNING);
+                });
+            } else {
                 plugin.setState(GameState.RUNNING);
-            });
+                broadcast(lang.prefixed("game.started"));
+            }
         });
     }
 
@@ -233,6 +246,11 @@ public final class IgelBingoCommands implements SimpleCommand {
 
     private Component deserialize(String text) {
         return LegacyComponentSerializer.legacyAmpersand().deserialize(text);
+    }
+
+    private void delayStopLobby() {
+        proxy.getScheduler().buildTask(plugin, docker::stopLobby)
+                .delay(5, TimeUnit.SECONDS).schedule();
     }
 
     @Override

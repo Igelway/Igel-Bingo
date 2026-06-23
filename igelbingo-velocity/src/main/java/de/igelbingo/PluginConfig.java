@@ -25,7 +25,7 @@ public final class PluginConfig {
     public String gameMemory = "6G";
     public String gameDifficulty = "easy";
     public int gameViewDistance = 20;
-    public int gameMaxPlayers = -1;
+    public int gameMaxPlayers = 500;
     public boolean pullGameImage = false;
 
     // Lobby
