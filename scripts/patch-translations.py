@@ -1,104 +1,82 @@
 #!/usr/bin/env python3
 """
-Patch resource pack translations for BAC advancements.
-BAC uses namespace keys like 'advancements.building.its_a_sign.title'
-but the old de_de.json maps English text like 'It's a Sign'.
-This script generates a proper de_de.json that matches BAC's actual keys.
+Generate BOTH de_de.json and en_us.json for the resource pack.
+Reads BAC advancement JSONs to get actual translation keys,
+maps them to German (from old de_de.json) and English (generated).
+Also includes original English text as en_us.json for completeness.
 """
 import json
 import os
-import re
 import sys
 
 BAC_DIR = sys.argv[1] if len(sys.argv) > 1 else "docker/bac-datapack"
 OLD_DE = sys.argv[2] if len(sys.argv) > 2 else "igelbingo-game/src/main/resources/resourcepack/assets/minecraft/lang/de_de.json"
-OUTPUT = sys.argv[3] if len(sys.argv) > 3 else "docker/IgelBingo_Resources.json"
+OUT_DIR = sys.argv[3] if len(sys.argv) > 3 else "/tmp/rp-out"
+
+os.makedirs(os.path.join(OUT_DIR, "assets", "minecraft", "lang"), exist_ok=True)
 
 # Load old German translations (English text → German text)
 with open(OLD_DE, 'r', encoding='utf-8') as f:
     old_translations = json.load(f)
 
-# Generate English text from namespace key
-def key_to_english(key):
-    # 'advancements.building.its_a_sign.title' → 'Its A Sign'
-    # Remove namespace prefix and .title/.description suffix
+def key_to_title(key):
+    """Convert namespace key to human-readable English title."""
     text = key
     for suffix in ['.title', '.description']:
         if text.endswith(suffix):
             text = text[:-len(suffix)]
-    # Get the last part after the last dot
     parts = text.split('.')
     name = parts[-1] if parts else text
-    # Convert snake_case to Title Case
     words = name.replace('_', ' ').split()
     return ' '.join(w.capitalize() for w in words)
 
-# Collect all BAC advancement translation keys
-translations = {}
+de_translations = {}
+en_translations = {}
 
-def collect_advancements(base_dir):
-    adv_dir = os.path.join(base_dir, 'data', 'blazeandcave', 'advancement')
-    if not os.path.isdir(adv_dir):
+def process_adv_file(path):
+    try:
+        with open(path, 'r', encoding='utf-8') as fp:
+            data = json.load(fp)
+    except Exception:
         return
+
+    display = data.get('display', {})
+    for field in ['title', 'description']:
+        field_data = display.get(field, {})
+        key = field_data.get('translate', '')
+        if not key:
+            continue
+
+        # Try to find existing German translation
+        german = old_translations.get(key)
+        if german is None:
+            english = key_to_title(key)
+            german = old_translations.get(english)
+        if german:
+            de_translations[key] = german
+            en_translations[key] = key_to_title(key)
+
+# Scan BAC advancements
+for base in ['blazeandcave', 'minecraft']:
+    adv_dir = os.path.join(BAC_DIR, 'data', base, 'advancement')
+    if not os.path.isdir(adv_dir):
+        continue
     for root, dirs, files in os.walk(adv_dir):
         for f in files:
-            if not f.endswith('.json'):
-                continue
-            path = os.path.join(root, f)
-            try:
-                with open(path, 'r', encoding='utf-8') as fp:
-                    data = json.load(fp)
-            except (json.JSONDecodeError, Exception):
-                continue
+            if f.endswith('.json'):
+                process_adv_file(os.path.join(root, f))
 
-            display = data.get('display', {})
-            for field in ['title', 'description']:
-                field_data = display.get(field, {})
-                key = field_data.get('translate', '')
-                if not key:
-                    continue
-                # Try to find existing German translation
-                german = old_translations.get(key, None)
-                if german is None:
-                    # Try matching by English text approximation
-                    english = key_to_english(key)
-                    german = old_translations.get(english, None)
-                if german:
-                    translations[key] = german
+# Write de_de.json
+with open(os.path.join(OUT_DIR, 'assets', 'minecraft', 'lang', 'de_de.json'), 'w', encoding='utf-8') as f:
+    json.dump(de_translations, f, ensure_ascii=False, indent=2)
 
-    # Also collect vanilla advancement keys
-    vanilla_dir = os.path.join(base_dir, 'data', 'minecraft', 'advancement')
-    if os.path.isdir(vanilla_dir):
-        for root, dirs, files in os.walk(vanilla_dir):
-            for f in files:
-                if not f.endswith('.json'):
-                    continue
-                path = os.path.join(root, f)
-                try:
-                    with open(path, 'r', encoding='utf-8') as fp:
-                        data = json.load(fp)
-                except (json.JSONDecodeError, Exception):
-                    continue
+# Write en_us.json (maps keys to English display text)
+with open(os.path.join(OUT_DIR, 'assets', 'minecraft', 'lang', 'en_us.json'), 'w', encoding='utf-8') as f:
+    json.dump(en_translations, f, ensure_ascii=False, indent=2)
 
-                display = data.get('display', {})
-                for field in ['title', 'description']:
-                    field_data = display.get(field, {})
-                    key = field_data.get('translate', '')
-                    if not key:
-                        continue
-                    german = old_translations.get(key, None)
-                    if german is None:
-                        english = key_to_english(key)
-                        german = old_translations.get(english, None)
-                    if german:
-                        translations[key] = german
+# Copy pack.mcmeta
+meta = {"pack": {"description": "Igel-Bingo: BAC translations (de+en)", "min_format": [101, 1], "max_format": [101, 1]}}
+with open(os.path.join(OUT_DIR, 'pack.mcmeta'), 'w', encoding='utf-8') as f:
+    json.dump(meta, f)
 
-collect_advancements(BAC_DIR)
-
-print(f"Found {len(translations)} translatable keys")
-
-# Write output
-with open(OUTPUT, 'w', encoding='utf-8') as f:
-    json.dump(translations, f, ensure_ascii=False, indent=2)
-
-print(f"Written to {OUTPUT}")
+print(f"German: {len(de_translations)} keys, English: {len(en_translations)} keys")

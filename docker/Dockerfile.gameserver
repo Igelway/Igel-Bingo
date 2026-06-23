@@ -25,6 +25,9 @@ RUN mkdir -p /opt/app-files/plugins && chown -R minecraft:minecraft /opt/app-fil
 COPY docker/download-plugins.sh /tmp/download-plugins.sh
 RUN chmod +x /tmp/download-plugins.sh && /tmp/download-plugins.sh /opt/app-files/plugins
 
+# Copy additional plugins from original server
+COPY docker/plugins/*.jar /opt/app-files/plugins/
+
 # Copy IgelBingo Game Plugin
 COPY igelbingo-game/build/libs/igelbingo-purpur-plugin.jar /opt/app-files/plugins/
 
