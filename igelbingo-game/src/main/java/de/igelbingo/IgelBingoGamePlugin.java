@@ -14,6 +14,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerAdvancementDoneEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.FireworkMeta;
@@ -28,7 +32,7 @@ import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessageListener {
+public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessageListener, Listener {
 
     private static final String CHANNEL = "igelbingo:main";
 
@@ -46,6 +50,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     public void onEnable() {
         getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
         getServer().getMessenger().registerIncomingPluginChannel(this, CHANNEL, this);
+        getServer().getPluginManager().registerEvents(this, this);
 
         saveDefaultConfig();
         loadGameConfig();
@@ -67,6 +72,18 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         getServer().getMessenger().unregisterOutgoingPluginChannel(this, CHANNEL);
         getServer().getMessenger().unregisterIncomingPluginChannel(this, CHANNEL, this);
         getLogger().info("IgelBingo Game Plugin disabled.");
+    }
+
+    @EventHandler
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        World world = event.getPlayer().getWorld();
+        world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
+        world.setGameRule(GameRules.SEND_COMMAND_FEEDBACK, false);
+    }
+
+    @EventHandler
+    public void onAdvancementDone(PlayerAdvancementDoneEvent event) {
+        event.message(null);
     }
 
     // =========================================================================
@@ -137,7 +154,6 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
         // Gamerules (from bingo_purpur)
         applyGameRules(overworld);
-        suppressBacNotifications();
         firstStart = true;
 
         getLogger().info("World initialized with bingo settings.");
@@ -196,10 +212,11 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
         // Cancel datapack countdown (revert to lobby state)
         getServer().dispatchCommand(getServer().getConsoleSender(),
-                "function bingo_setup:bingo_start/abort_countdown/abort_countdown");
+                "function bingo_setup:bingo_start/abort_countdown/revert_countdown");
 
         // End BingoReloaded game
         getServer().dispatchCommand(getServer().getConsoleSender(), "bingo end");
+        getServer().dispatchCommand(getServer().getConsoleSender(), "autobingo end");
 
         phase = GamePhase.IDLE;
         broadcast("&6[Igel-Bingo] &cCountdown abgebrochen.");
@@ -350,20 +367,20 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     private void suppressBacNotifications() {
         ConsoleCommandSender console = getServer().getConsoleSender();
 
-        dispatchSilently(console, "function blazeandcave:config/msg_task_off");
-        dispatchSilently(console, "function blazeandcave:config/msg_goal_off");
-        dispatchSilently(console, "function blazeandcave:config/msg_challenge_off");
-        dispatchSilently(console, "function blazeandcave:config/msg_super_challenge_off");
-        dispatchSilently(console, "function blazeandcave:config/msg_milestone_off");
-        dispatchSilently(console, "function blazeandcave:config/msg_set_off");
-        dispatchSilently(console, "function blazeandcave:config/msg_set_server1");
-        dispatchSilently(console, "function blazeandcave:config/msg_set_vanilla_msg");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_task_off");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_goal_off");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_challenge_off");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_super_challenge_off");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_milestone_off");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_set_off");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_set_server1");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_set_vanilla_msg");
 
-        dispatchSilently(console, "function blazeandcave:config/intro_msg_off");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/intro_msg_off");
 
-        dispatchSilently(console, "function blazeandcave:config/trophies_off");
-        dispatchSilently(console, "function blazeandcave:config/item_rewards_off");
-        dispatchSilently(console, "function blazeandcave:config/exp_rewards_off");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/trophies_off");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/item_rewards_off");
+        dispatchSilently(console, "execute as @a run function blazeandcave:config/exp_rewards_off");
 
         getLogger().info("BAC notifications, toasts, sounds and rewards silenced.");
     }
