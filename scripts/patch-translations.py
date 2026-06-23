@@ -52,9 +52,11 @@ def process_adv_file(path):
         if german is None:
             english = key_to_title(key)
             german = old_translations.get(english)
+        # Always add English fallback
+        en_translations[key] = key_to_title(key)
+        # Add German if available
         if german:
             de_translations[key] = german
-            en_translations[key] = key_to_title(key)
 
 # Scan BAC advancements
 for base in ['blazeandcave', 'minecraft']:
