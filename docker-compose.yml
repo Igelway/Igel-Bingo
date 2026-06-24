@@ -67,7 +67,7 @@ services:
     restart: "no"
     environment:
       TYPE: PURPUR
-      VERSION: "26.2"
+      VERSION: "26.1.2"
       PURPUR_BUILD: LATEST
       EULA: ${MINECRAFT_SERVER_EULA:-true}
       ONLINE_MODE: "FALSE"
