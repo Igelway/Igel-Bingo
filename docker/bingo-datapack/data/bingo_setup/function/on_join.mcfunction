@@ -1,0 +1,1 @@
+execute unless score dummy bingo_running matches 1 run function bingo_setup:world_start/lobby/lobby_music/play_bridging_music

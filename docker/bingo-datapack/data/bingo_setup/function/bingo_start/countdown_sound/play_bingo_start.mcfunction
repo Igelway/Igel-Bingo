@@ -1,0 +1,1 @@
+playsound minecraft:bingo.start record @a ~ ~ ~ 1.0 1.0 0.70

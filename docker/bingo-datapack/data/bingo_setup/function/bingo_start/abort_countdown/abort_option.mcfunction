@@ -1,0 +1,1 @@
+execute as @a if score @s isOpped matches 1 run tellraw @s [{text:"[Igelway Datapack]: ",color:"white"},{text:"Countdown abbrechen",color:"red",bold:true, click_event:{action:"run_command",command:"function bingo_setup:bingo_start/abort_countdown/abort_countdown"},hover_event:{action:"show_text",value:[{text:"Klicken um Spielstart abzubrechen"}]}}]

@@ -1,0 +1,2 @@
+execute if score dummy water_level < dummy world_surface run return run execute positioned over world_surface positioned -10 ~100 -11 run place template bingo_setup:lobby
+execute positioned -10 162 -11 run place template bingo_setup:lobby

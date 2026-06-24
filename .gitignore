@@ -24,6 +24,10 @@ hs_err_pid*
 # Docker data
 data/
 
+# Datapack content (not Docker runtime data)
+!docker/bingo-datapack/data/
+!docker/game-data/
+
 # Secrets
 .forwarding.secret
 .playit.secret

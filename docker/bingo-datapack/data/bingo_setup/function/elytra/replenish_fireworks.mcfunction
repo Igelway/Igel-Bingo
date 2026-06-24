@@ -1,0 +1,1 @@
+item replace entity @s hotbar.4 with minecraft:firework_rocket[fireworks={flight_duration:1},custom_data={bingo_elytra:1b}] 64

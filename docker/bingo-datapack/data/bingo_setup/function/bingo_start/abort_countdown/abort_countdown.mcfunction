@@ -1,0 +1,1 @@
+execute if score dummy bingo_countdown_running matches 1 run return run function bingo_setup:bingo_start/abort_countdown/revert_countdown

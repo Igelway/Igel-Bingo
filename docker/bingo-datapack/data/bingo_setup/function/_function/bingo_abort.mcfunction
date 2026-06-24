@@ -1,0 +1,2 @@
+function bingo_setup:bingo_end/bingo_end
+function bingo_setup:world_start/lobby/lobby_reset

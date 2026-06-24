@@ -1,0 +1,1 @@
+scoreboard players set dummy bingo_running 0

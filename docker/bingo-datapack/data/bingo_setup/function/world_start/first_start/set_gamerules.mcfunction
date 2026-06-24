@@ -1,0 +1,11 @@
+gamerule fall_damage false
+gamerule fire_damage false
+gamerule freeze_damage false
+gamerule keep_inventory true
+gamerule immediate_respawn true
+gamerule log_admin_commands false
+gamerule elytra_movement_check true
+gamerule reduced_debug_info true
+gamerule send_command_feedback false
+gamerule show_advancement_messages true
+worldborder center 0 0
