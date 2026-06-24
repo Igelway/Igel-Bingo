@@ -68,6 +68,7 @@ services:
     environment:
       TYPE: PURPUR
       VERSION: "26.1.2"
+      RESOURCE_PACK: ${IGELBINGO_RESOURCE_PACK:-}
       PURPUR_BUILD: LATEST
       EULA: ${MINECRAFT_SERVER_EULA:-true}
       ONLINE_MODE: "FALSE"
