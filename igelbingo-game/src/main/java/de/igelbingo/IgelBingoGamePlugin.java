@@ -338,6 +338,14 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         shovelMeta.addEnchant(Enchantment.SILK_TOUCH, 1, true);
         shovelMeta.displayName(Component.text("◠◡◠◡◠◡◠◡◠◡◠◡Schaufel◠◡◠◡◠◡◠◡◠◡◠◡", NamedTextColor.AQUA));
         shovel.setItemMeta(shovelMeta);
+        // Clear existing netherite shovels in hotbar slots 0-3
+        for (int slot = 0; slot <= 3; slot++) {
+            ItemStack existing = player.getInventory().getItem(slot);
+            if (existing != null && existing.getType() == Material.NETHERITE_SHOVEL) {
+                player.getInventory().clear(slot);
+            }
+        }
+
         for (int slot = 0; slot <= 3; slot++) {
             ItemStack existing = player.getInventory().getItem(slot);
             if (existing == null || existing.isEmpty()) {
