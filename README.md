@@ -114,19 +114,17 @@ BingoReloaded calls `igelbingo start` (game plugin) before the game begins and `
 
 ## Deployment
 
-```bash
-# Pull latest GHCR images and restart
-just pull && just down && just up
+Pre-built images are published to `ghcr.io` and used by default — no extra configuration needed.
 
-# Build plugins and Docker images locally, then start
-just build
-just docker-build
+```bash
+# Update to the latest pre-built images
+just pull && just restart
+
+# Alternatively: build plugins and Docker images locally
+just build && just docker-build
 IGELBINGO_VELOCITY_IMAGE=igel-bingo-velocity:local \
 IGELBINGO_GAMESERVER_IMAGE=igel-bingo-gameserver:local \
 just up
-
-# Restart without rebuilding
-just restart
 ```
 
 ## CI/CD

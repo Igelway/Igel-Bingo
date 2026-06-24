@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.igelbingo"
-version = "1.1.1"
+version = "1.1.2"
 
 java {
     toolchain {
@@ -27,7 +27,7 @@ dependencies {
 
 tasks {
     shadowJar {
-        archiveFileName.set("igelbingo-purpur-plugin.jar")
+        archiveFileName.set("igelbingo-purpur-${project.version}.jar")
         archiveClassifier.set("")
         relocate("org.yaml.snakeyaml", "de.igelbingo.libs.snakeyaml")
     }

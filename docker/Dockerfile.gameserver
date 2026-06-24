@@ -29,7 +29,7 @@ RUN chmod +x /tmp/download-plugins.sh && /tmp/download-plugins.sh /opt/app-files
 COPY docker/plugins/ /opt/app-files/plugins/
 
 # Copy IgelBingo Game Plugin
-COPY igelbingo-game/build/libs/igelbingo-purpur-plugin.jar /opt/app-files/plugins/
+COPY igelbingo-game/build/libs/igelbingo-purpur-*.jar /opt/app-files/plugins/
 
 # Copy Bingo data files
 COPY docker/game-data/ /opt/app-files/game-data/

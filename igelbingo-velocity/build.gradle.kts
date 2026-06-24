@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.igelbingo"
-version = "1.1.1"
+version = "1.1.2"
 
 java {
     toolchain {
@@ -31,7 +31,7 @@ dependencies {
 
 tasks {
     shadowJar {
-        archiveFileName.set("igelbingo-velocity-plugin.jar")
+        archiveFileName.set("igelbingo-velocity-${project.version}.jar")
         archiveClassifier.set("")
         relocate("org.yaml.snakeyaml", "de.igelbingo.libs.snakeyaml")
     }

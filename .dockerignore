@@ -1,7 +1,7 @@
 **/target/**
 **/build/**
-!igelbingo-velocity/build/libs/igelbingo-velocity-plugin.jar
-!igelbingo-game/build/libs/igelbingo-purpur-plugin.jar
+!igelbingo-velocity/build/libs/igelbingo-velocity-*.jar
+!igelbingo-game/build/libs/igelbingo-purpur-*.jar
 **/.gradle/**
 **/node_modules/**
 .git/
