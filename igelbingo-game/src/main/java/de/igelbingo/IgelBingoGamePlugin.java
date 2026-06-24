@@ -51,6 +51,9 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
     private BukkitTask fireworksTask;
 
+    private final List<String> pendingPluginMessages = new ArrayList<>();
+    private boolean chunkyRunning = false;
+
     @Override
     public void onEnable() {
         getServer().getMessenger().registerOutgoingPluginChannel(this, CHANNEL);
@@ -87,6 +90,8 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         World world = player.getWorld();
         world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
         world.setGameRule(GameRules.SEND_COMMAND_FEEDBACK, false);
+
+        flushPendingPluginMessages(player);
 
         if (phase == GamePhase.RUNNING && player.getGameMode() != GameMode.SPECTATOR) {
             getServer().getScheduler().runTaskLater(this, () -> {
@@ -218,6 +223,11 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
     public void startPreGameSequence() {
         if (phase != GamePhase.IDLE) return;
+
+        if (chunkyRunning) {
+            getLogger().info("Chunky still running — delaying game start");
+            return;
+        }
 
         phase = GamePhase.COUNTDOWN;
         countdownRemaining = gameConfig.countdownSeconds;
@@ -516,9 +526,16 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         if (!getServer().getOnlinePlayers().isEmpty()) {
             Player first = getServer().getOnlinePlayers().iterator().next();
             first.sendPluginMessage(this, CHANNEL, data);
-        } else {
-            getServer().sendPluginMessage(this, CHANNEL, data);
         }
+        getServer().sendPluginMessage(this, CHANNEL, data);
+        pendingPluginMessages.add(message);
+    }
+
+    private void flushPendingPluginMessages(Player player) {
+        for (String msg : pendingPluginMessages) {
+            player.sendPluginMessage(this, CHANNEL, msg.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        }
+        pendingPluginMessages.clear();
     }
 
     // =========================================================================
@@ -539,6 +556,8 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
             int netherRadius = envInt("IGELBINGO_CHUNKY_NETHER_RADIUS", 2000);
             int endRadius = envInt("IGELBINGO_CHUNKY_END_RADIUS", 2000);
 
+            chunkyRunning = true;
+
             int[] completed = {0};
             int[] started = {0};
 
@@ -556,26 +575,45 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
                 }
                 if (completed[0] >= started[0]) {
                     getLogger().info("All Chunky preload tasks complete!");
+                    chunkyRunning = false;
+                    try { new java.io.File("/data/chunky_done").createNewFile(); } catch (Exception ignored) {}
                     sendPluginMessage("chunky_done");
+                    getServer().broadcast(net.kyori.adventure.text.Component.text("[Igel-Bingo] Chunky-Vorgenerierung abgeschlossen! Spiel kann starten.", net.kyori.adventure.text.format.NamedTextColor.YELLOW));
+                }
+            });
+
+            Class<?> progressEventClass = Class.forName("org.popcraft.chunky.api.event.task.GenerationProgressEvent");
+            java.lang.reflect.Method onProgressMethod = chunkyApiClass.getMethod("onGenerationProgress", java.util.function.Consumer.class);
+            int[] lastReportedPct = {0};
+            onProgressMethod.invoke(chunky, (java.util.function.Consumer<Object>) event -> {
+                try {
+                    java.lang.reflect.Method progressMethod = progressEventClass.getMethod("progress");
+                    float progress = (float) progressMethod.invoke(event);
+                    int pct = Math.round(progress * 100);
+                    if (pct - lastReportedPct[0] >= 20 || pct >= 100) {
+                        lastReportedPct[0] = pct;
+                        sendPluginMessage("chunky_progress:" + pct);
+                    }
+                } catch (Exception ignored) {
                 }
             });
 
             java.lang.reflect.Method startTaskMethod = chunkyApiClass.getMethod(
-                    "startTask", String.class, String.class, int.class, int.class, int.class, int.class, String.class);
+                    "startTask", String.class, String.class, double.class, double.class, double.class, double.class, String.class);
 
             World overworld = getServer().getWorlds().getFirst();
-            startTaskMethod.invoke(chunky, overworld.getName(), "square", 0, 0, owRadius, owRadius, "concentric");
+            startTaskMethod.invoke(chunky, overworld.getName(), "square", 0.0, 0.0, (double) owRadius, (double) owRadius, "concentric");
             started[0]++;
 
             World nether = getServer().getWorld(overworld.getName() + "_nether");
             if (nether != null) {
-                startTaskMethod.invoke(chunky, nether.getName(), "square", 0, 0, netherRadius, netherRadius, "concentric");
+                startTaskMethod.invoke(chunky, nether.getName(), "square", 0.0, 0.0, (double) netherRadius, (double) netherRadius, "concentric");
                 started[0]++;
             }
 
             World end = getServer().getWorld(overworld.getName() + "_the_end");
             if (end != null) {
-                startTaskMethod.invoke(chunky, end.getName(), "square", 0, 0, endRadius, endRadius, "concentric");
+                startTaskMethod.invoke(chunky, end.getName(), "square", 0.0, 0.0, (double) endRadius, (double) endRadius, "concentric");
                 started[0]++;
             }
 
@@ -583,9 +621,11 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
                     + " (ow=" + owRadius + ", nether=" + netherRadius + ", end=" + endRadius + ")");
         } catch (ClassNotFoundException e) {
             getLogger().warning("Chunky not installed — skipping preload");
+            chunkyRunning = false;
             sendPluginMessage("chunky_done");
         } catch (Exception e) {
             getLogger().severe("Failed to start Chunky preload: " + e.getMessage());
+            chunkyRunning = false;
             sendPluginMessage("chunky_done");
         }
     }

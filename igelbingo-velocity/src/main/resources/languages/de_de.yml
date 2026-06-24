@@ -23,7 +23,7 @@ game:
 
 prepare:
   starting: "&aBingo-Server wird vorbereitet mit Chunky-Pregeneration..."
-  chunky-running: "&eChunky läuft... Fortschritt: {progress}%"
+  chunky-running: "&eChunky generiert Chunks... ({progress}%)"
   chunky-done: "&aChunky-Vorgenerierung abgeschlossen! Server ist bereit."
   start-failed: "&cServer-Vorbereitung fehlgeschlagen (Timeout)."
   chunky-timeout: "&cChunky-Vorgenerierung fehlgeschlagen (Timeout). Server dennoch bereit."

@@ -7,7 +7,11 @@ mkdir -p "$TARGET_DIR"
 download_with_checksum() {
   local url="$1"
   local sha256="$2"
-  local filename=$(basename "${url%%\?*}")
+  local filename="$3"
+
+  if [ -z "$filename" ]; then
+    filename=$(basename "${url%%\?*}")
+  fi
 
   echo "Downloading $filename..."
   curl -fSL -o "$TARGET_DIR/$filename" "$url"
@@ -41,6 +45,7 @@ download_with_checksum \
 # Chunky
 download_with_checksum \
   "https://hangar.papermc.io/api/v1/projects/pop4959/Chunky/versions/1.5.3/PAPER/download" \
-  ""
+  "" \
+  "Chunky-Bukkit-1.5.3.jar"
 
 echo "All plugins downloaded."

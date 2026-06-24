@@ -189,7 +189,12 @@ public final class IgelBingoPlugin {
             setState(GameState.RUNNING);
         } else if ("chunky_done".equals(message)) {
             logger.info("Chunky preload done signal received from game server");
+            broadcast(lang.prefixed("prepare.chunky-done"));
             dockerManager.onChunkyDone();
+        } else if (message.startsWith("chunky_progress:")) {
+            String pct = message.substring("chunky_progress:".length());
+            logger.info("Chunky progress: " + pct + "%");
+            broadcast(lang.prefixed("prepare.chunky-running", "progress", pct));
         }
     }
 

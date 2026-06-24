@@ -174,10 +174,18 @@ public final class DockerServerManager {
 
         chunkyReadyFuture = new CompletableFuture<>();
 
-        long deadline = System.currentTimeMillis() + 300_000;
-
         Thread thread = new Thread(() -> {
-            while (!chunkyReadyFuture.isDone() && System.currentTimeMillis() < deadline) {
+            while (!chunkyReadyFuture.isDone()) {
+                try {
+                    String result = docker("exec", GAME_CONTAINER_NAME, "sh", "-c", "test -f /data/chunky_done && echo done").trim();
+                    if ("done".equals(result) || result.contains("done")) {
+                        chunkyAlreadyDone = true;
+                        chunkyReadyFuture.complete(true);
+                        logger.info("Chunky marker file detected — preload complete");
+                        return;
+                    }
+                } catch (Exception ignored) {
+                }
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
@@ -187,9 +195,6 @@ public final class DockerServerManager {
                     }
                     return;
                 }
-            }
-            if (!chunkyReadyFuture.isDone()) {
-                chunkyReadyFuture.complete(false);
             }
         });
         thread.setDaemon(true);
@@ -333,7 +338,7 @@ public final class DockerServerManager {
             }
 
             int exitCode = process.waitFor();
-            if (exitCode != 0 && command.size() > 1 && !"inspect".equals(command.get(1))) {
+            if (exitCode != 0 && command.size() > 1 && !"inspect".equals(command.get(1)) && !"exec".equals(command.get(1))) {
                 logger.warning("Command exited with " + exitCode + ": " + String.join(" ", command));
             }
 

@@ -23,7 +23,7 @@ game:
 
 prepare:
   starting: "&aPreparing Bingo server with Chunky pre-generation..."
-  chunky-running: "&eChunky running... Progress: {progress}%"
+  chunky-running: "&eChunky generating chunks... ({progress}%)"
   chunky-done: "&aChunky pre-generation complete! Server is ready."
   start-failed: "&cServer preparation failed (timeout)."
   chunky-timeout: "&cChunky pre-generation failed (timeout). Server is nevertheless ready."
