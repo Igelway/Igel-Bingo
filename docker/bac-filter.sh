@@ -13,7 +13,7 @@ echo "Downloading BlazeandCave's Advancements Pack from Modrinth..."
 mkdir -p "$WORK_DIR"
 mkdir -p "$BAC_DATAPACK_DIR"
 
-BAC_URL="https://cdn.modrinth.com/data/VoVJ47kN/versions/3SdMv4Dr/BlazeandCave%27s%20Advancements%20Pack%201.18.3.zip"
+BAC_URL="https://cdn.modrinth.com/data/VoVJ47kN/versions/Y2zZ5eSs/BlazeandCave%27s%20Advancements%20Pack%201.21.zip"
 
 if command -v curl &>/dev/null; then
     curl -fSL -o "$WORK_DIR/bac.zip" "$BAC_URL"

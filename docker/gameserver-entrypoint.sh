@@ -69,7 +69,7 @@ configuration: SINGULAR
 defaultWorldName: world
 language: de.yml
 savePlayerStatistics: true
-sendCommandAfterGameEnds: "igelbingo end"
+sendCommandAfterGameEnds: function bingo_setup:bingo_end/bingo_end
 sendCommandBeforeGameStarts: "igelbingo start"
 playerGamemodeAfterGame: NONE
 voteUsingCommandsOnly: false
@@ -84,7 +84,7 @@ disableCompanionMod: false
 singlePlayerTeams: false
 minimumPlayerCount: 0
 playerWaitTime: 50
-gameRestartTime: -1
+gameRestartTime: 30
 useVoteSystem: false
 preventPlayerGriefing: false
 startingCountdownTime: 30
@@ -146,6 +146,10 @@ CONFEOF
 
 echo "Installing BingoReloaded sounds..."
 cat > /data/plugins/BingoReloaded/sounds.yml << 'SOUNDSEOF'
+# Each sound contains some properties that can be changed:
+#   sound: Reference to the actual minecraft sound, as can be obtained using /playsound in-game.
+#   volume: Loudness of the sound between 0.0 and 1.0, where 0.0 is silent and 1.0 is the loudest possible
+
 go_up_wand_used:
   sound: "minecraft:entity.shulker.teleport"
   volume: 0.8
@@ -157,11 +161,11 @@ hotswap_task_added:
 hotswap_task_expired:
   sound: "block.trial_spawner.spawn_item_begin"
   volume: 1.0
-
+#minecraft:block.note_block.bit
 countdown_tick_1:
   sound: ""
   volume: 0.0
-
+#minecraft:block.note_block.pling
 countdown_tick_2:
   sound: ""
   volume: 0.0

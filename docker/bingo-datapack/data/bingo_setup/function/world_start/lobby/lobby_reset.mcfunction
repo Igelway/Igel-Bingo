@@ -9,7 +9,4 @@ effect clear @a[gamemode=survival]
 execute unless score dummy lobby_placed matches 1 run function bingo_setup:world_start/lobby/create_lobby
 function bingo_setup:world_start/player_check/player_check
 schedule function bingo_setup:world_start/util/tp_to_lobby 2t
-stopsound @a record
-schedule clear bingo_setup:world_start/lobby/lobby_music/random_song
-schedule function bingo_setup:world_start/lobby/lobby_music/random_song 3t
 scoreboard players set dummy bingo_countdown_running 0

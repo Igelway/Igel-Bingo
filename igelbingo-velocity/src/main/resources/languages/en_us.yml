@@ -19,6 +19,7 @@ game:
   ended: "&eBingo ended! Use &c/ib stop &eto shut down the server."
   state: "&eStatus: {state}"
   server-ready: "&aBingo server ready in {time} seconds."
+  already-on-game: "&eYou are already on the game server."
 
 prepare:
   starting: "&aPreparing Bingo server with Chunky pre-generation..."

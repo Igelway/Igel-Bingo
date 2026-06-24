@@ -41,7 +41,7 @@ public final class IgelBingoCommands implements SimpleCommand {
         }
 
         switch (args[0].toLowerCase()) {
-            case "start" -> handleStart(args);
+            case "start" -> handleStart(args, invocation);
             case "prepare" -> handlePrepare(args);
             case "stop" -> handleStop();
             case "seed" -> handleSeed(args);
@@ -51,8 +51,15 @@ public final class IgelBingoCommands implements SimpleCommand {
         }
     }
 
-    private void handleStart(String[] args) {
+    private void handleStart(String[] args, Invocation invocation) {
+        var source = invocation.source();
         if (plugin.getState() == GameState.RUNNING) {
+            if (source instanceof com.velocitypowered.api.proxy.Player player
+                    && player.getCurrentServer().isPresent()
+                    && "game".equals(player.getCurrentServer().get().getServerInfo().getName())) {
+                source.sendMessage(deserialize(lang.prefixed("game.already-on-game")));
+                return;
+            }
             routeAllToGame();
             broadcast(lang.prefixed("game.started"));
             return;

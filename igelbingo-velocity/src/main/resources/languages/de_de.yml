@@ -19,6 +19,7 @@ game:
   ended: "&eBingo beendet! Nutze &c/ib stop &eum den Server herunterzufahren."
   state: "&eStatus: {state}"
   server-ready: "&aBingo-Server ist bereit in {time} Sekunden."
+  already-on-game: "&eDu bist bereits auf dem Game-Server."
 
 prepare:
   starting: "&aBingo-Server wird vorbereitet mit Chunky-Pregeneration..."
