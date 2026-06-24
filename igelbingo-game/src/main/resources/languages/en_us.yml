@@ -1,0 +1,11 @@
+# ==========================================================================
+#    English (en_us) Language File for IgelBingo Game Plugin
+# ==========================================================================
+
+prefix: "&7[&6Igel-Bingo&7]&r"
+countdown-aborted: "&6[Igel-Bingo] &cCountdown aborted."
+abort-button: "[Abort Countdown]"
+abort-hover: "Click to abort game start"
+elytra-name: "Igel-Bingo Elytra"
+shovel-name: "◠◡◠◡◠◡◠◡◠◡◠◡Shovel◠◡◠◡◠◡◠◡◠◡◠◡"
+chunky-complete: "&e[Igel-Bingo] Chunky pre-generation complete! Game can start."

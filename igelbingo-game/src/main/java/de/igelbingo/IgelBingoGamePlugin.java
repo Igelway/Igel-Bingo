@@ -2,6 +2,7 @@ package de.igelbingo;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -43,6 +44,8 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
     private static final String CHANNEL = "igelbingo:main";
 
+    private GameLang lang;
+
     private GamePhase phase = GamePhase.IDLE;
     private final GameConfig gameConfig = new GameConfig();
 
@@ -62,6 +65,8 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
         saveDefaultConfig();
         loadGameConfig();
+
+        lang = new GameLang(System.getenv().getOrDefault("IGELBINGO_LANGUAGE", "de_de"));
 
         performFirstStart();
 
@@ -283,15 +288,16 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         }
 
         phase = GamePhase.IDLE;
-        broadcast("&6[Igel-Bingo] &cCountdown abgebrochen.");
+        broadcast(lang.get("countdown-aborted"));
         getLogger().info("Countdown aborted, BingoReloaded game ended.");
     }
 
     private void showAbortDialog() {
         Component msg = Component.text()
                 .append(Component.text("[Igel-Bingo] ", NamedTextColor.GOLD))
-                .append(Component.text("[Countdown abbrechen]", NamedTextColor.RED, TextDecoration.BOLD)
-                        .clickEvent(ClickEvent.runCommand("/igelbingo abort")))
+                .append(Component.text(lang.get("abort-button"), NamedTextColor.RED, TextDecoration.BOLD)
+                        .clickEvent(ClickEvent.runCommand("/igelbingo abort"))
+                        .hoverEvent(HoverEvent.showText(Component.text(lang.get("abort-hover")))))
                 .build();
 
         for (Player player : getServer().getOnlinePlayers()) {
@@ -328,7 +334,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
             ItemStack elytra = new ItemStack(Material.ELYTRA);
             var meta = (Damageable) elytra.getItemMeta();
             meta.setUnbreakable(true);
-            meta.displayName(Component.text("Igel-Bingo Elytra", NamedTextColor.GOLD));
+            meta.displayName(Component.text(lang.get("elytra-name"), NamedTextColor.GOLD));
             meta.addEnchant(Enchantment.PROTECTION, 0, true);
             elytra.setItemMeta(meta);
             player.getInventory().setChestplate(elytra);
@@ -346,7 +352,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         var shovelMeta = shovel.getItemMeta();
         shovelMeta.setUnbreakable(true);
         shovelMeta.addEnchant(Enchantment.SILK_TOUCH, 1, true);
-        shovelMeta.displayName(Component.text("◠◡◠◡◠◡◠◡◠◡◠◡Schaufel◠◡◠◡◠◡◠◡◠◡◠◡", NamedTextColor.AQUA));
+        shovelMeta.displayName(Component.text(lang.get("shovel-name"), NamedTextColor.AQUA));
         shovel.setItemMeta(shovelMeta);
         // Clear existing netherite shovels in hotbar slots 0-3
         for (int slot = 0; slot <= 3; slot++) {
@@ -578,7 +584,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
                     chunkyRunning = false;
                     try { new java.io.File("/data/chunky_done").createNewFile(); } catch (Exception ignored) {}
                     sendPluginMessage("chunky_done");
-                    getServer().broadcast(net.kyori.adventure.text.Component.text("[Igel-Bingo] Chunky-Vorgenerierung abgeschlossen! Spiel kann starten.", net.kyori.adventure.text.format.NamedTextColor.YELLOW));
+                    getServer().broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(lang.get("chunky-complete")));
                 }
             });
 

@@ -1,0 +1,11 @@
+# ==========================================================================
+#    German (de_de) Language File for IgelBingo Game Plugin
+# ==========================================================================
+
+prefix: "&7[&6Igel-Bingo&7]&r"
+countdown-aborted: "&6[Igel-Bingo] &cCountdown abgebrochen."
+abort-button: "[Countdown abbrechen]"
+abort-hover: "Klicken um Spielstart abzubrechen"
+elytra-name: "Igel-Bingo Elytra"
+shovel-name: "◠◡◠◡◠◡◠◡◠◡◠◡Schaufel◠◡◠◡◠◡◠◡◠◡◠◡"
+chunky-complete: "&e[Igel-Bingo] Chunky-Vorgenerierung abgeschlossen! Spiel kann starten."

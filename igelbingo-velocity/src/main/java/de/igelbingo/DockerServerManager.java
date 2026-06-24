@@ -117,6 +117,9 @@ public final class DockerServerManager {
             cmd.add("IGELBINGO_CHUNKY_END_RADIUS=" + config.chunkyEndRadius);
         }
 
+        cmd.add("-e");
+        cmd.add("IGELBINGO_LANGUAGE=" + config.language);
+
         cmd.add(image);
 
         docker(cmd.toArray(new String[0]));
