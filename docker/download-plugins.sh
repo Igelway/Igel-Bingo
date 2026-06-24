@@ -37,9 +37,9 @@ download_with_checksum \
   "https://cdn.modrinth.com/data/Vebnzrzj/versions/MBSY8toc/LuckPerms-Bukkit-5.5.53.jar" \
   ""
 
-# PacketEvents
+# PacketEvents v2.13.0 — Minecraft 26.2 support
 download_with_checksum \
-  "https://github.com/retrooper/packetevents/releases/download/v2.12.2/packetevents-spigot-2.12.2.jar" \
+  "https://cdn.modrinth.com/data/HYKaKraK/versions/h0ncTpUP/packetevents-spigot-2.13.0.jar" \
   ""
 
 # Chunky
