@@ -170,8 +170,10 @@ public final class IgelBingoPlugin {
     @Subscribe
     public void onDisconnect(DisconnectEvent event) {
         if (state == GameState.RUNNING) return;
-        if (hasPlayersOnLobby()) return;
-        startLobbyIdleTimer();
+        proxy.getScheduler().buildTask(this, () -> {
+            if (hasPlayersOnLobby()) return;
+            startLobbyIdleTimer();
+        }).delay(2, TimeUnit.SECONDS).schedule();
     }
 
     @Subscribe
