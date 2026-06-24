@@ -13,9 +13,9 @@ WORKDIR /data
 
 RUN mkdir -p /opt/app-files/plugins
 
-# Download Velocity
+# Download Velocity 3.4.0-SNAPSHOT (supports up to Minecraft 1.21.11)
 RUN curl -o /opt/app-files/velocity.jar -L \
-    "https://fill-data.papermc.io/v1/objects/0407642d1ed2883100eb823c2805523f191fa637db1f42ac0ec7ef29cbe455a9/velocity-3.5.0-SNAPSHOT-601.jar"
+    "https://api.papermc.io/v2/projects/velocity/versions/3.4.0-SNAPSHOT/builds/559/downloads/velocity-3.4.0-SNAPSHOT-559.jar"
 
 # Download LuckPerms for Velocity
 RUN curl -o /opt/app-files/plugins/LuckPerms-Velocity.jar -L \
