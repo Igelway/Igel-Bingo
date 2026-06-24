@@ -1,1 +1,0 @@
-playsound minecraft:goat_horn.sound.7 record @a ~ ~ ~ 1.0 1.0 0.70

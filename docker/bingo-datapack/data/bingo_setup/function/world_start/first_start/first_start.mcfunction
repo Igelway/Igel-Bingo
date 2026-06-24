@@ -7,8 +7,3 @@ execute in minecraft:the_nether run worldborder set 4000
 execute in minecraft:the_end run function bingo_setup:world_start/first_start/set_gamerules
 execute in minecraft:the_end run worldborder set 8000
 scoreboard players set dummy after_first_start 1
-
-#/function blazeandcave:config/intro_msg_off
-#/function blazeandcave:config/item_rewards_off
-#/function blazeandcave:config/exp_rewards_off
-#/function blazeandcave:config/trophies_off

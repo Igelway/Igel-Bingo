@@ -1,1 +1,0 @@
-playsound minecraft:music_disc.precipice record @a ~ ~ ~ 0.60 1.0 0.40
