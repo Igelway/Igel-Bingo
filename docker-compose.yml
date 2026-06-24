@@ -84,6 +84,7 @@ services:
     volumes:
       - ./data/lobby:/data
       - ./docker/lobby-entrypoint.sh:/lobby-entrypoint.sh
+      - ./docker/lobby-datapack:/opt/lobby-datapack:ro
     ports: []
     networks:
       - igelbingo-network

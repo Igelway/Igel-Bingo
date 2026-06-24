@@ -19,6 +19,12 @@ else
   echo "WARNING: No forwarding secret found at /run/secrets/forwarding_secret"
 fi
 
+if [ -d "/opt/lobby-datapack" ]; then
+  mkdir -p /data/world/datapacks
+  cp -r /opt/lobby-datapack /data/world/datapacks/lobby
+  echo "Lobby datapack installed."
+fi
+
 if [ "$(id -u)" -eq 0 ]; then
   chown -R minecraft:minecraft /data 2>/dev/null || true
 fi

@@ -45,8 +45,9 @@ COPY docker/bac-datapack/ /opt/app-files/bac-datapack/
 
 # Copy entrypoint
 COPY docker/shared-functions.sh /opt/shared-functions.sh
+COPY docker/bac-filter.sh /opt/app-files/bac-filter.sh
 COPY docker/gameserver-entrypoint.sh /gameserver-entrypoint.sh
-RUN chmod +x /gameserver-entrypoint.sh
+RUN chmod +x /opt/app-files/bac-filter.sh /gameserver-entrypoint.sh
 
 EXPOSE 25565
 

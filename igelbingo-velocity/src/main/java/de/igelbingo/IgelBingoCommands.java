@@ -146,17 +146,24 @@ public final class IgelBingoCommands implements SimpleCommand {
         broadcast(lang.prefixed("game.stopping"));
         plugin.setState(GameState.STOPPING);
 
-        routeAllToLobby();
-
-        docker.stopGameServer();
-        docker.removeOldGameContainers();
-
-        if (config.lobbyAutoStart && !docker.isLobbyRunning()) {
+        if (!docker.isLobbyRunning() && config.lobbyAutoStart) {
             docker.startLobby();
         }
 
+        routeAllToLimbo();
+
+        docker.stopGameServer();
+        docker.removeOldGameContainers();
         plugin.setState(GameState.IDLE);
         broadcast(lang.prefixed("game.stopped"));
+    }
+
+    private void routeAllToLimbo() {
+        proxy.getServer("limbo").ifPresent(limbo -> {
+            proxy.getAllPlayers().forEach(player -> {
+                player.createConnectionRequest(limbo).fireAndForget();
+            });
+        });
     }
 
     private void handleSeed(String[] args) {

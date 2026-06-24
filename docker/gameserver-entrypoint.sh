@@ -49,6 +49,12 @@ if [ -d "/opt/app-files/bac-datapack" ]; then
   echo "BAC datapack installed."
 fi
 
+# Download and filter BAC advancements at runtime
+if [ -x "/opt/app-files/bac-filter.sh" ]; then
+  echo "Running BAC filter to download and install advancements..."
+  /opt/app-files/bac-filter.sh /data/world/datapacks/BAC_Filtered
+fi
+
 if [ -d "/opt/app-files/game-data" ]; then
   mkdir -p /data/plugins/BingoReloaded/data
   cp /opt/app-files/game-data/*.nbt /data/plugins/BingoReloaded/data/
