@@ -103,6 +103,8 @@ public final class DockerServerManager {
         if (resourcePack != null && !resourcePack.isEmpty()) {
             cmd.add("-e");
             cmd.add("RESOURCE_PACK=" + resourcePack);
+            cmd.add("-e");
+            cmd.add("REQUIRE_RESOURCE_PACK=true");
             forwardedKeys.add("RESOURCE_PACK");
         }
 
