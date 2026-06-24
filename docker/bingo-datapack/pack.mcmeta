@@ -1,6 +1,7 @@
 {
   "pack": {
-    "description": "Bingo Setup & Start Automatisierung für 26.1.2",
-    "pack_format": 101
+    "min_format": [101, 0],
+    "max_format": [101, 1],
+    "description": "Bingo Setup & Start Automatisierung für 26.1.2"
   }
 }
