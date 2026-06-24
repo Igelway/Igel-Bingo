@@ -60,6 +60,9 @@ docker-host: "tcp://docker-proxy:2375"
 # Comma-separated list of ops for the game server
 game-ops: []
 
+# Give elytra at game start (env: IGELBINGO_GAME_GIVE_ELYTRA)
+give-elytra: true
+
 # Whether to start the game in Docker mode (auto-set by environment)
 docker-mode: true
 

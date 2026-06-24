@@ -68,10 +68,6 @@ public final class IgelBingoCommands implements SimpleCommand {
         plugin.setState(GameState.STARTING);
         broadcast(lang.prefixed("game.starting"));
 
-        if (clean) {
-            docker.cleanupGameData();
-        }
-
         boolean withChunky = config.chunkyPreload && !clean;
 
         docker.createGameServer(withChunky);
@@ -147,11 +143,6 @@ public final class IgelBingoCommands implements SimpleCommand {
     }
 
     private void handleStop() {
-        if (plugin.getState() == GameState.IDLE) {
-            broadcast(lang.prefixed("game.not-running"));
-            return;
-        }
-
         broadcast(lang.prefixed("game.stopping"));
         plugin.setState(GameState.STOPPING);
 
@@ -195,7 +186,6 @@ public final class IgelBingoCommands implements SimpleCommand {
 
     private void handleCleanup() {
         docker.removeOldGameContainers();
-        docker.cleanupGameData();
         broadcast(lang.prefixed("cleanup.done"));
     }
 

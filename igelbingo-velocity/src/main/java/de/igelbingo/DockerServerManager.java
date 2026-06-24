@@ -6,6 +6,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -33,10 +34,6 @@ public final class DockerServerManager {
         this.logger = logger;
     }
 
-    public void init() {
-        logger.info("Docker client ready (CLI mode)");
-    }
-
     // =========================================================================
     //    Game Server
     // =========================================================================
@@ -55,7 +52,7 @@ public final class DockerServerManager {
 
         String forwardingSecret = "";
         try {
-            forwardingSecret = new String(Files.readAllBytes(Path.of("/run/secrets/forwarding_secret"))).trim();
+            forwardingSecret = new String(Files.readAllBytes(Path.of("/run/secrets/forwarding_secret")), StandardCharsets.UTF_8).trim();
         } catch (IOException ignored) {
         }
 
@@ -136,8 +133,10 @@ public final class DockerServerManager {
             return future;
         }
 
+        long deadline = System.currentTimeMillis() + 300_000;
+
         Thread thread = new Thread(() -> {
-            while (!future.isDone()) {
+            while (!future.isDone() && System.currentTimeMillis() < deadline) {
                 try {
                     String state = dockerInspect(GAME_CONTAINER_NAME, "State.Running");
                     if ("true".equals(state)) {
@@ -158,6 +157,9 @@ public final class DockerServerManager {
                     return;
                 }
             }
+            if (!future.isDone()) {
+                future.complete(false);
+            }
         });
         thread.setDaemon(true);
         thread.start();
@@ -172,8 +174,10 @@ public final class DockerServerManager {
 
         chunkyReadyFuture = new CompletableFuture<>();
 
+        long deadline = System.currentTimeMillis() + 300_000;
+
         Thread thread = new Thread(() -> {
-            while (!chunkyReadyFuture.isDone()) {
+            while (!chunkyReadyFuture.isDone() && System.currentTimeMillis() < deadline) {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
@@ -183,6 +187,9 @@ public final class DockerServerManager {
                     }
                     return;
                 }
+            }
+            if (!chunkyReadyFuture.isDone()) {
+                chunkyReadyFuture.complete(false);
             }
         });
         thread.setDaemon(true);
@@ -215,9 +222,6 @@ public final class DockerServerManager {
             }
         } catch (Exception ignored) {
         }
-    }
-
-    public void cleanupGameData() {
     }
 
     public void setSeed(String seed) {
@@ -339,8 +343,4 @@ public final class DockerServerManager {
         }
     }
 
-    // =========================================================================
-
-    public void close() {
-    }
 }

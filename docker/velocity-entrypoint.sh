@@ -40,23 +40,7 @@ fi
 echo "Setting up application file symlinks..."
 find /data -type l -delete 2>/dev/null || true
 
-create_symlinks() {
-  local source_dir="$1"
-  local target_dir="$2"
-  if [ ! -d "$source_dir" ]; then
-    return
-  fi
-  mkdir -p "$target_dir"
-  for file in "$source_dir"/*; do
-    if [ -f "$file" ]; then
-      echo "  Symlinking $(basename "$file") -> $target_dir/"
-      ln -sf "$file" "$target_dir/$(basename "$file")"
-    elif [ -d "$file" ]; then
-      local dirname=$(basename "$file")
-      create_symlinks "$file" "$target_dir/$dirname"
-    fi
-  done
-}
+. /opt/shared-functions.sh
 
 ln -sf /opt/app-files/velocity.jar /data/velocity.jar
 create_symlinks "/opt/app-files/plugins" "/data/plugins"

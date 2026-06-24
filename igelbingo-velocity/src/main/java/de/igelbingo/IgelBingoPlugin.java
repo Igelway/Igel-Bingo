@@ -63,9 +63,6 @@ public final class IgelBingoPlugin {
         proxy.getChannelRegistrar().register(CHANNEL);
 
         dockerManager = new DockerServerManager(config, proxy, logger);
-        if (config.dockerMode) {
-            dockerManager.init();
-        }
 
         commands = new IgelBingoCommands(this);
         proxy.getCommandManager().register(
@@ -120,9 +117,6 @@ public final class IgelBingoPlugin {
     @Subscribe
     public void onProxyShutdown(ProxyShutdownEvent event) {
         scheduler.shutdownNow();
-        if (dockerManager != null) {
-            dockerManager.close();
-        }
     }
 
     @Subscribe
@@ -156,22 +150,20 @@ public final class IgelBingoPlugin {
 
             if (!dockerManager.isLobbyRunning()) {
                 dockerManager.startLobby();
-                player.sendMessage(
-                        net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
-                                .legacyAmpersand()
-                                .deserialize(lang.prefixed("lobby.starting"))
-                );
-
-                dockerManager.waitForLobbyReady().thenAccept(ready -> {
-                    if (ready) {
-                        proxy.getServer("lobby").ifPresent(lobby ->
-                                player.createConnectionRequest(lobby).fireAndForget());
-                    }
-                });
-            } else {
-                proxy.getServer("lobby").ifPresent(lobby ->
-                        player.createConnectionRequest(lobby).fireAndForget());
             }
+
+            player.sendMessage(
+                    net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+                            .legacyAmpersand()
+                            .deserialize(lang.prefixed("lobby.starting"))
+            );
+
+            dockerManager.waitForLobbyReady().thenAccept(ready -> {
+                if (ready) {
+                    proxy.getServer("lobby").ifPresent(lobby ->
+                            player.createConnectionRequest(lobby).fireAndForget());
+                }
+            });
         }).delay(1, TimeUnit.SECONDS).schedule();
     }
 
@@ -194,6 +186,7 @@ public final class IgelBingoPlugin {
             handleGameEnded();
         } else if ("game_started".equals(message)) {
             logger.info("Game started signal received from game server");
+            setState(GameState.RUNNING);
         } else if ("chunky_done".equals(message)) {
             logger.info("Chunky preload done signal received from game server");
             dockerManager.onChunkyDone();

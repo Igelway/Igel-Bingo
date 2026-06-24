@@ -26,6 +26,13 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import com.github.retrooper.packetevents.PacketEvents;
+import com.github.retrooper.packetevents.event.PacketListener;
+import com.github.retrooper.packetevents.event.PacketListenerPriority;
+import com.github.retrooper.packetevents.event.PacketSendEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateAdvancements;
+
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
@@ -38,12 +45,10 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
     private GamePhase phase = GamePhase.IDLE;
     private final GameConfig gameConfig = new GameConfig();
-    private boolean firstStart = false;
 
     private BukkitTask countdownTask;
     private int countdownRemaining;
 
-    private BukkitTask elytraTask;
     private BukkitTask fireworksTask;
 
     @Override
@@ -58,6 +63,8 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         performFirstStart();
 
         extractResourcePack();
+
+        registerAdvancementToastBlocker();
 
         if ("true".equalsIgnoreCase(System.getenv("IGELBINGO_CHUNKY_PRELOAD"))) {
             startChunkyPreload();
@@ -76,14 +83,43 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        World world = event.getPlayer().getWorld();
+        Player player = event.getPlayer();
+        World world = player.getWorld();
         world.setGameRule(GameRules.SHOW_ADVANCEMENT_MESSAGES, false);
         world.setGameRule(GameRules.SEND_COMMAND_FEEDBACK, false);
+
+        if (phase == GamePhase.RUNNING && player.getGameMode() != GameMode.SPECTATOR) {
+            getServer().getScheduler().runTaskLater(this, () -> {
+                if (player.isOnline() && player.getGameMode() != GameMode.SPECTATOR) {
+                    giveStarterKit(player);
+                }
+            }, 10L);
+        }
     }
 
     @EventHandler
     public void onAdvancementDone(PlayerAdvancementDoneEvent event) {
         event.message(null);
+    }
+
+    // =========================================================================
+    //    Advancement Toast Blocker (packetevents)
+    // =========================================================================
+
+    private void registerAdvancementToastBlocker() {
+        PacketEvents.getAPI().getEventManager().registerListener(
+            new PacketListener() {
+                @Override
+                public void onPacketSend(PacketSendEvent event) {
+                    if (event.getPacketType() != PacketType.Play.Server.UPDATE_ADVANCEMENTS) return;
+
+                    WrapperPlayServerUpdateAdvancements wrapper = new WrapperPlayServerUpdateAdvancements(event);
+                    wrapper.setShowAdvancements(false);
+                    event.markForReEncode(true);
+                }
+            },
+            PacketListenerPriority.LOW
+        );
     }
 
     // =========================================================================
@@ -98,6 +134,12 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         gameConfig.worldborderEnd = config.getInt("worldborder-end", 8000);
         gameConfig.elytraReplenishInterval = config.getInt("elytra-replenish-interval", 8);
         gameConfig.elytraReplenishAmount = config.getInt("elytra-replenish-amount", 64);
+        gameConfig.giveElytra = config.getBoolean("give-elytra", true);
+
+        String envGiveElytra = System.getenv("GIVE_ELYTRA");
+        if (envGiveElytra != null) {
+            gameConfig.giveElytra = !"false".equalsIgnoreCase(envGiveElytra);
+        }
     }
 
     // =========================================================================
@@ -154,7 +196,6 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
         // Gamerules (from bingo_purpur)
         applyGameRules(overworld);
-        firstStart = true;
 
         getLogger().info("World initialized with bingo settings.");
     }
@@ -196,8 +237,16 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
             public void run() {
                 phase = GamePhase.RUNNING;
                 countdownTask = null;
+
+                for (Player p : getServer().getOnlinePlayers()) {
+                    if (p.getGameMode() != GameMode.SPECTATOR) {
+                        giveStarterKit(p);
+                    }
+                }
+                startElytraTasks();
+
                 sendPluginMessage("game_started");
-                getLogger().info("Game started (countdown complete).");
+                getLogger().info("Game started (countdown complete, kit given).");
             }
         }.runTaskLater(this, 20L * gameConfig.countdownSeconds + 20L);
     }
@@ -210,13 +259,18 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
             countdownTask = null;
         }
 
-        // Cancel datapack countdown (revert to lobby state)
         getServer().dispatchCommand(getServer().getConsoleSender(),
                 "function bingo_setup:bingo_start/abort_countdown/revert_countdown");
 
-        // End BingoReloaded game
-        getServer().dispatchCommand(getServer().getConsoleSender(), "bingo end");
-        getServer().dispatchCommand(getServer().getConsoleSender(), "autobingo end");
+        Player bingoSender = getServer().getOnlinePlayers().stream()
+                .filter(p -> p.hasPermission("igelbingo.admin")).findFirst().orElse(null);
+        if (bingoSender != null) {
+            boolean result = getServer().dispatchCommand(bingoSender, "bingo end");
+            getLogger().info("Dispatched /bingo end as " + bingoSender.getName() + " (result=" + result + ")");
+        } else {
+            boolean result = getServer().dispatchCommand(getServer().getConsoleSender(), "bingo end");
+            getLogger().info("Dispatched /bingo end from console (result=" + result + ")");
+        }
 
         phase = GamePhase.IDLE;
         broadcast("&6[Igel-Bingo] &cCountdown abgebrochen.");
@@ -260,14 +314,15 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     // =========================================================================
 
     private void giveStarterKit(Player player) {
-        // Unbreakable Elytra
-        ItemStack elytra = new ItemStack(Material.ELYTRA);
-        var meta = (Damageable) elytra.getItemMeta();
-        meta.setUnbreakable(true);
-        meta.displayName(Component.text("Igel-Bingo Elytra", NamedTextColor.GOLD));
-        meta.addEnchant(Enchantment.PROTECTION, 0, true);
-        elytra.setItemMeta(meta);
-        player.getInventory().setChestplate(elytra);
+        if (gameConfig.giveElytra) {
+            ItemStack elytra = new ItemStack(Material.ELYTRA);
+            var meta = (Damageable) elytra.getItemMeta();
+            meta.setUnbreakable(true);
+            meta.displayName(Component.text("Igel-Bingo Elytra", NamedTextColor.GOLD));
+            meta.addEnchant(Enchantment.PROTECTION, 0, true);
+            elytra.setItemMeta(meta);
+            player.getInventory().setChestplate(elytra);
+        }
 
         // Fireworks (slot 4, power 1)
         ItemStack fireworks = new ItemStack(Material.FIREWORK_ROCKET, 64);
@@ -283,11 +338,11 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         shovelMeta.addEnchant(Enchantment.SILK_TOUCH, 1, true);
         shovelMeta.displayName(Component.text("◠◡◠◡◠◡◠◡◠◡◠◡Schaufel◠◡◠◡◠◡◠◡◠◡◠◡", NamedTextColor.AQUA));
         shovel.setItemMeta(shovelMeta);
-        for (int slot = 3; slot >= 0; slot--) {
+        for (int slot = 0; slot <= 3; slot++) {
             ItemStack existing = player.getInventory().getItem(slot);
             if (existing == null || existing.isEmpty()) {
                 player.getInventory().setItem(slot, shovel);
-                break;
+                return;
             }
         }
     }
@@ -297,22 +352,6 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     // =========================================================================
 
     private void startElytraTasks() {
-        // Elytra check every second
-        elytraTask = new BukkitRunnable() {
-            @Override
-            public void run() {
-                for (Player player : getServer().getOnlinePlayers()) {
-                    if (player.getGameMode() == GameMode.SPECTATOR) continue;
-
-                    ItemStack chest = player.getInventory().getChestplate();
-                    if (chest == null || chest.getType() != Material.ELYTRA) {
-                        giveStarterElytra(player);
-                    }
-                }
-            }
-        }.runTaskTimer(this, 40L, 20L);
-
-        // Firework replenish (slot 4, fills to 64)
         fireworksTask = new BukkitRunnable() {
             @Override
             public void run() {
@@ -337,28 +376,9 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         }.runTaskTimer(this, 20L * gameConfig.elytraReplenishInterval, 20L * gameConfig.elytraReplenishInterval);
     }
 
-    private void giveStarterElytra(Player player) {
-        ItemStack elytra = new ItemStack(Material.ELYTRA);
-        var meta = (Damageable) elytra.getItemMeta();
-        meta.setUnbreakable(true);
-        meta.displayName(Component.text("Igel-Bingo Elytra", NamedTextColor.GOLD));
-        elytra.setItemMeta(meta);
-        player.getInventory().setChestplate(elytra);
-    }
-
     // =========================================================================
     //    Sound Effects
     // =========================================================================
-
-    private void playCountdownSound(int seconds) {
-        for (Player player : getServer().getOnlinePlayers()) {
-            if (seconds <= 3) {
-                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_HAT, 1f, 1f);
-            } else {
-                player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 0.5f, 1f);
-            }
-        }
-    }
 
     // =========================================================================
     //    BAC Silencing
@@ -367,26 +387,21 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     private void suppressBacNotifications() {
         ConsoleCommandSender console = getServer().getConsoleSender();
 
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_task_off");
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_goal_off");
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_challenge_off");
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_super_challenge_off");
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_milestone_off");
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_set_off");
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_set_server1");
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/msg_set_vanilla_msg");
+        getServer().dispatchCommand(console, "scoreboard players set task bac_settings 0");
+        getServer().dispatchCommand(console, "scoreboard players set goal bac_settings 0");
+        getServer().dispatchCommand(console, "scoreboard players set challenge bac_settings 0");
+        getServer().dispatchCommand(console, "scoreboard players set super_challenge bac_settings 0");
+        getServer().dispatchCommand(console, "scoreboard players set milestone bac_settings 0");
+        getServer().dispatchCommand(console, "scoreboard players set intro_msg bac_settings 0");
+        getServer().dispatchCommand(console, "scoreboard players set trophies bac_settings 0");
+        getServer().dispatchCommand(console, "scoreboard players set item_rewards bac_settings 0");
+        getServer().dispatchCommand(console, "scoreboard players set exp_rewards bac_settings 0");
 
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/intro_msg_off");
-
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/trophies_off");
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/item_rewards_off");
-        dispatchSilently(console, "execute as @a run function blazeandcave:config/exp_rewards_off");
+        getServer().dispatchCommand(console, "execute in minecraft:the_end run gamerule show_advancement_messages false");
+        getServer().dispatchCommand(console, "execute in minecraft:overworld run gamerule show_advancement_messages false");
+        getServer().dispatchCommand(console, "execute in minecraft:the_nether run gamerule show_advancement_messages false");
 
         getLogger().info("BAC notifications, toasts, sounds and rewards silenced.");
-    }
-
-    private void dispatchSilently(ConsoleCommandSender console, String command) {
-        getServer().dispatchCommand(console, command);
     }
 
     // =========================================================================
@@ -583,7 +598,6 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
     private void cancelAllTasks() {
         if (countdownTask != null) { countdownTask.cancel(); countdownTask = null; }
-        if (elytraTask != null) { elytraTask.cancel(); elytraTask = null; }
         if (fireworksTask != null) { fireworksTask.cancel(); fireworksTask = null; }
     }
 

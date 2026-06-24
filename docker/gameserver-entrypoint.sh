@@ -5,28 +5,7 @@ echo "Setting up mod symlinks..."
 find /data/mods -type l -delete 2>/dev/null || true
 find /data/plugins -type l -delete 2>/dev/null || true
 
-create_symlinks() {
-  local source_dir="$1"
-  local target_dir="$2"
-  if [ ! -d "$source_dir" ]; then
-    return
-  fi
-  mkdir -p "$target_dir"
-  for file in "$source_dir"/*; do
-    if [ -f "$file" ]; then
-      local filename=$(basename "$file")
-      if [[ "$filename" == *-dev.jar ]] || [[ "$filename" == *-sources.jar ]]; then
-        echo "  Skipping $filename (dev/sources)"
-        continue
-      fi
-      echo "  Symlinking $filename -> $target_dir/$filename"
-      ln -sf "$file" "$target_dir/$filename"
-    elif [ -d "$file" ]; then
-      local dirname=$(basename "$file")
-      create_symlinks "$file" "$target_dir/$dirname"
-    fi
-  done
-}
+. /opt/shared-functions.sh
 
 create_symlinks "/opt/app-files/plugins" "/data/plugins"
 
@@ -99,7 +78,7 @@ disableCompanionMod: false
 singlePlayerTeams: false
 minimumPlayerCount: 0
 playerWaitTime: 50
-gameRestartTime: 30
+gameRestartTime: -1
 useVoteSystem: false
 preventPlayerGriefing: false
 startingCountdownTime: 30
@@ -158,6 +137,57 @@ defaultWorlds:
 clearDefaultWorlds: true
 customWorldGeneration: ''
 CONFEOF
+
+echo "Installing BingoReloaded sounds..."
+cat > /data/plugins/BingoReloaded/sounds.yml << 'SOUNDSEOF'
+go_up_wand_used:
+  sound: "minecraft:entity.shulker.teleport"
+  volume: 0.8
+
+hotswap_task_added:
+  sound: "minecraft:item.axe.wax_off"
+  volume: 1.0
+
+hotswap_task_expired:
+  sound: "block.trial_spawner.spawn_item_begin"
+  volume: 1.0
+
+countdown_tick_1:
+  sound: ""
+  volume: 0.0
+
+countdown_tick_2:
+  sound: ""
+  volume: 0.0
+
+game_ended:
+  sound: "minecraft:block.vault.open_shutter"
+  volume: 1.0
+
+game_won:
+  sound: "minecraft:item.goat_horn.sound.1"
+  volume: 0.6
+
+deathmatch_initiated:
+  sound: "minecraft:entity.happy_ghast.ambient"
+  volume: 1.0
+
+deathmatch_reveal:
+  sound: "minecraft:entity.ghast.shoot"
+  volume: 1.0
+
+task_completed:
+  sound: "minecraft:block.amethyst_cluster.step"
+  volume: 1.0
+
+start_countdown_finished_1:
+  sound: "minecraft:item.goat_horn.sound.6"
+  volume: 0.0
+
+start_countdown_finished_2:
+  sound: "minecraft:item.goat_horn.sound.5"
+  volume: 0.0
+SOUNDSEOF
 
 if [ "$(id -u)" -eq 0 ]; then
   chown -R minecraft:minecraft /data 2>/dev/null || true

@@ -1,6 +1,6 @@
 package de.igelbingo;
 
-import com.velocitypowered.api.plugin.PluginContainer;
+
 import org.yaml.snakeyaml.Yaml;
 
 import java.io.InputStream;

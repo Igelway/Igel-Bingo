@@ -15,10 +15,13 @@ java {
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven("https://repo.codemc.io/repository/maven-releases/")
+    maven("https://repo.codemc.io/repository/maven-snapshots/")
 }
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.1.2.build.69-stable")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.12.2")
     implementation("org.yaml:snakeyaml:2.4")
 }
 

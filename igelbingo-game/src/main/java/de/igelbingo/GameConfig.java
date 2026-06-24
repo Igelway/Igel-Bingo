@@ -7,4 +7,5 @@ public final class GameConfig {
     public int worldborderEnd = 8000;
     public int elytraReplenishInterval = 8;  // seconds
     public int elytraReplenishAmount = 64;
+    public boolean giveElytra = true;
 }

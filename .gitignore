@@ -37,6 +37,7 @@ data/
 logs/
 crash-reports/
 
+
 # OS
 .DS_Store
 Thumbs.db

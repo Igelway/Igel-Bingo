@@ -24,6 +24,9 @@ dependencies {
     compileOnly("net.luckperms:api:5.4")
 
     implementation("org.yaml:snakeyaml:2.4")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.12.0")
+    testImplementation("org.mockito:mockito-core:5.15.2")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
 tasks {
@@ -45,4 +48,9 @@ tasks {
         options.encoding = "UTF-8"
         options.release = 25
     }
+}
+
+tasks.test {
+    useJUnitPlatform()
+    jvmArgs("--add-opens", "java.base/java.util=ALL-UNNAMED")
 }

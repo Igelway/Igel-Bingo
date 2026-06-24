@@ -28,6 +28,7 @@ COPY igelbingo-velocity/build/libs/igelbingo-velocity-plugin.jar /opt/app-files/
 COPY docker/defaults/velocity/ /opt/config-template/
 
 # Copy entrypoint
+COPY docker/shared-functions.sh /opt/shared-functions.sh
 COPY docker/velocity-entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 

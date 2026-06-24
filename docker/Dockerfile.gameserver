@@ -44,6 +44,7 @@ COPY docker/bingo-datapack/ /opt/app-files/bingo-datapack/
 COPY docker/bac-datapack/ /opt/app-files/bac-datapack/
 
 # Copy entrypoint
+COPY docker/shared-functions.sh /opt/shared-functions.sh
 COPY docker/gameserver-entrypoint.sh /gameserver-entrypoint.sh
 RUN chmod +x /gameserver-entrypoint.sh
 

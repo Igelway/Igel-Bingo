@@ -4,7 +4,7 @@ main: de.igelbingo.IgelBingoGamePlugin
 api-version: "26.1.2"
 description: Game management plugin for Igel-Bingo (replaces bingo_purpur datapack)
 authors: [Igelway]
-depend: [BingoReloaded]
+depend: [BingoReloaded, packetevents]
 
 commands:
   igelbingo:
