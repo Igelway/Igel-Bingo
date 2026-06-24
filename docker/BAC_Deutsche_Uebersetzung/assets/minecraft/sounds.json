@@ -1,0 +1,139 @@
+{
+  "bingo.start": {
+    "sounds": [
+      {
+        "name": "bingo/start",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.hype": {
+    "sounds": [
+      {
+        "name": "bingo/hype/hype1",
+        "stream": true
+      },
+      {
+        "name": "bingo/hype/hype2",
+        "stream": true
+      },
+      {
+        "name": "bingo/hype/hype3",
+        "stream": true
+      },
+      {
+        "name": "bingo/hype/hype4",
+        "stream": true
+      },
+      {
+        "name": "bingo/hype/hype5",
+        "stream": true
+      },
+      {
+        "name": "bingo/hype/hype6",
+        "stream": true
+      },
+      {
+        "name": "bingo/hype/hype7",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.fortnite": {
+    "sounds": [
+      {
+        "name": "bingo/fortnite",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.lobby.0_drawful_animate_140": {
+    "sounds": [
+      {
+        "name": "bingo/lobby/0_drawful_animate_140",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.lobby.1_kahoot_game_20_3_62": {
+    "sounds": [
+      {
+        "name": "bingo/lobby/1_kahoot_game_20_3_62",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.lobby.2_kahoot_lobby_144": {
+    "sounds": [
+      {
+        "name": "bingo/lobby/2_kahoot_lobby_144",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.lobby.3_nonsensory_110": {
+    "sounds": [
+      {
+        "name": "bingo/lobby/3_nonsensory_110",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.lobby.4_quiplash_3_114": {
+    "sounds": [
+      {
+        "name": "bingo/lobby/4_quiplash_3_114",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.lobby.5_roomerang_123": {
+    "sounds": [
+      {
+        "name": "bingo/lobby/5_roomerang_123",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.lobby.6_survive_the_internet_85": {
+    "sounds": [
+      {
+        "name": "bingo/lobby/6_survive_the_internet_85",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.lobby.7_tee_ko_162": {
+    "sounds": [
+      {
+        "name": "bingo/lobby/7_tee_ko_162",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.lobby.8_trivia_murder_party_2_83": {
+    "sounds": [
+      {
+        "name": "bingo/lobby/8_trivia_murder_party_2_83",
+        "stream": true
+      }
+    ]
+  },
+  "bingo.lobby.9_weapons_drawn_116": {
+    "sounds": [
+      {
+        "name": "bingo/lobby/9_weapons_drawn_116",
+        "stream": true
+      }
+    ]
+  }
+  ,
+  "bingo.lobby.10_quiplash_2_credits_149": {
+    "sounds": [
+      {
+        "name": "bingo/lobby/10_quiplash_2_credits_149",
+        "stream": true
+      }
+    ]
+  }
+}
