@@ -27,4 +27,4 @@ git tag "v$VERSION"
 
 echo ""
 echo "=== Version $VERSION tagged ==="
-echo "Push:  git push origin dev && git push origin v$VERSION"
+echo "Push:  git push origin main && git push origin v$VERSION"
