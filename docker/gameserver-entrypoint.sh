@@ -199,6 +199,22 @@ start_countdown_finished_2:
   volume: 0.0
 SOUNDSEOF
 
+# Compute resource pack SHA1 if URL is set but SHA1 hash is missing
+if [ -n "${RESOURCE_PACK}" ] && [ -z "${RESOURCE_PACK_SHA1:-}" ]; then
+  echo "Computing resource pack SHA1 hash..."
+  if command -v curl &>/dev/null; then
+    RESOURCE_PACK_SHA1=$(curl -sfL --max-time 30 "${RESOURCE_PACK}" | sha1sum | cut -d' ' -f1)
+    if [ -n "${RESOURCE_PACK_SHA1}" ]; then
+      export RESOURCE_PACK_SHA1
+      echo "Resource pack SHA1: ${RESOURCE_PACK_SHA1}"
+    else
+      echo "WARNING: Failed to compute resource pack SHA1"
+    fi
+  else
+    echo "WARNING: curl not found, cannot compute resource pack SHA1"
+  fi
+fi
+
 if [ "$(id -u)" -eq 0 ]; then
   chown -R minecraft:minecraft /data 2>/dev/null || true
 fi
