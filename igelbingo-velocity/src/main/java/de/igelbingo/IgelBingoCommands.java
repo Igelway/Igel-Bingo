@@ -86,6 +86,11 @@ public final class IgelBingoCommands implements SimpleCommand {
                 return;
             }
 
+            plugin.setState(GameState.RUNNING);
+            routeAllToGame();
+            broadcast(lang.prefixed("game.started"));
+            if (config.lobbyStopOnGame) delayStopLobby();
+
             if (withChunky) {
                 broadcast(lang.prefixed("prepare.chunky-running", "progress", "0"));
                 docker.waitForChunkyReady().thenAccept(chunkyDone -> {
@@ -94,16 +99,7 @@ public final class IgelBingoCommands implements SimpleCommand {
                     } else {
                         broadcast(lang.prefixed("prepare.chunky-timeout"));
                     }
-                    plugin.setState(GameState.RUNNING);
-                    routeAllToGame();
-                    broadcast(lang.prefixed("game.started"));
-                    if (config.lobbyStopOnGame) delayStopLobby();
                 });
-            } else {
-                plugin.setState(GameState.RUNNING);
-                routeAllToGame();
-                broadcast(lang.prefixed("game.started"));
-                if (config.lobbyStopOnGame) delayStopLobby();
             }
         });
     }
@@ -132,6 +128,9 @@ public final class IgelBingoCommands implements SimpleCommand {
                 return;
             }
 
+            plugin.setState(GameState.RUNNING);
+            broadcast(lang.prefixed("game.started"));
+
             if (withChunky) {
                 broadcast(lang.prefixed("prepare.chunky-running", "progress", "0"));
                 docker.waitForChunkyReady().thenAccept(chunkyDone -> {
@@ -140,11 +139,7 @@ public final class IgelBingoCommands implements SimpleCommand {
                     } else {
                         broadcast(lang.prefixed("prepare.chunky-timeout"));
                     }
-                    plugin.setState(GameState.RUNNING);
                 });
-            } else {
-                plugin.setState(GameState.RUNNING);
-                broadcast(lang.prefixed("game.started"));
             }
         });
     }

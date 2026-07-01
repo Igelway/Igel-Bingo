@@ -26,7 +26,7 @@ public final class PluginConfig {
     public String gameDifficulty = "easy";
     public int gameViewDistance = 20;
     public int gameMaxPlayers = 500;
-    public boolean pullGameImage = false;
+    public boolean pullGameImage = true;
 
     // Lobby
     public boolean lobbyAutoStart = true;

@@ -671,6 +671,9 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
             getLogger().warning("Failed to cancel Chunky: " + e.getMessage());
         } finally {
             chunkyRunning = false;
+            try { new java.io.File("/data/chunky_done").createNewFile(); } catch (Exception ignored) {}
+            sendPluginMessage("chunky_done");
+            getServer().broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(lang.get("chunky-complete")));
         }
     }
 
