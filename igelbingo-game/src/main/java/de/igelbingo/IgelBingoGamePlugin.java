@@ -4,7 +4,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
+
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 
@@ -83,6 +83,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
     @Override
     public void onDisable() {
+        cancelChunkyTasks();
         cancelAllTasks();
         getServer().getMessenger().unregisterOutgoingPluginChannel(this, CHANNEL);
         getServer().getMessenger().unregisterIncomingPluginChannel(this, CHANNEL, this);
@@ -182,6 +183,11 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     // =========================================================================
 
     public void performFirstStart() {
+        if (getServer().getWorlds().isEmpty()) {
+            getLogger().warning("No worlds loaded — skipping first start init");
+            return;
+        }
+
         World overworld = getServer().getWorlds().getFirst();
 
         // Set worldspawn to 0,~,0
@@ -229,10 +235,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     public void startPreGameSequence() {
         if (phase != GamePhase.IDLE) return;
 
-        if (chunkyRunning) {
-            getLogger().info("Chunky still running — delaying game start");
-            return;
-        }
+        cancelChunkyTasks();
 
         phase = GamePhase.COUNTDOWN;
         countdownRemaining = gameConfig.countdownSeconds;
@@ -550,6 +553,12 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
     private void startChunkyPreload() {
         try {
+            if (getServer().getWorlds().isEmpty()) {
+                getLogger().warning("No worlds loaded — skipping Chunky preload");
+                sendPluginMessage("chunky_done");
+                return;
+            }
+
             Class<?> chunkyApiClass = Class.forName("org.popcraft.chunky.api.ChunkyAPI");
             Object chunky = getServer().getServicesManager().load(chunkyApiClass);
             if (chunky == null) {
@@ -633,6 +642,35 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
             getLogger().severe("Failed to start Chunky preload: " + e.getMessage());
             chunkyRunning = false;
             sendPluginMessage("chunky_done");
+        }
+    }
+
+    /**
+     * Cancels all running Chunky generation tasks via reflection.
+     */
+    private void cancelChunkyTasks() {
+        if (!chunkyRunning) return;
+        try {
+            Class<?> chunkyApiClass = Class.forName("org.popcraft.chunky.api.ChunkyAPI");
+            Object chunky = getServer().getServicesManager().load(chunkyApiClass);
+            if (chunky == null) { chunkyRunning = false; return; }
+
+            java.lang.reflect.Method cancelMethod;
+            try {
+                cancelMethod = chunkyApiClass.getMethod("cancelTasks");
+                cancelMethod.invoke(chunky);
+            } catch (NoSuchMethodException e) {
+                cancelMethod = chunkyApiClass.getMethod("cancelTask", String.class);
+                for (World w : getServer().getWorlds()) {
+                    cancelMethod.invoke(chunky, w.getName());
+                }
+            }
+
+            getLogger().info("Chunky generation cancelled — game starting");
+        } catch (Exception e) {
+            getLogger().warning("Failed to cancel Chunky: " + e.getMessage());
+        } finally {
+            chunkyRunning = false;
         }
     }
 
