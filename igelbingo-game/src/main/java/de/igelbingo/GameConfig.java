@@ -8,4 +8,5 @@ public final class GameConfig {
     public int elytraReplenishInterval = 8;  // seconds
     public int elytraReplenishAmount = 64;
     public boolean giveElytra = true;
+    public boolean modifiedLoottables = true;  // 1.16/1.16.1 piglin bartering
 }

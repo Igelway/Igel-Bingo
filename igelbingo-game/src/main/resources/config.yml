@@ -13,3 +13,7 @@ worldborder-end: 8000
 give-elytra: true                # give elytra at game start (env: IGELBINGO_GAME_GIVE_ELYTRA)
 elytra-replenish-interval: 8     # seconds between firework replenish
 elytra-replenish-amount: 64      # fireworks given per replenish (capped at 64 in slot 4)
+
+# Use the 1.16/1.16.1 (20w20a–20w27a) piglin bartering loot table instead of
+# vanilla. When false, vanilla bartering applies. (env: IGELBINGO_GAME_MODIFIED_LOOTTABLES)
+modified-loottables: true

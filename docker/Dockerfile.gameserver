@@ -43,6 +43,9 @@ COPY docker/bingo-datapack/ /opt/app-files/bingo-datapack/
 # Copy BAC datapack (advancements for bingo tasks)
 COPY docker/bac-datapack/ /opt/app-files/bac-datapack/
 
+# Copy biome size datapack (smaller biomes + smoother terrain, port of the Biome Sizes mod)
+COPY docker/biomesize-datapack/ /opt/app-files/biomesize-datapack/
+
 # Copy entrypoint
 COPY docker/shared-functions.sh /opt/shared-functions.sh
 COPY docker/bac-filter.sh /opt/app-files/bac-filter.sh

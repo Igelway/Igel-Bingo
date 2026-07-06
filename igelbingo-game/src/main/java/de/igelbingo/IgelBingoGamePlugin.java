@@ -66,6 +66,11 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         saveDefaultConfig();
         loadGameConfig();
 
+        if (gameConfig.modifiedLoottables) {
+            getServer().getPluginManager().registerEvents(new PiglinBarterListener(), this);
+            getLogger().info("Modified piglin bartering enabled (1.16/1.16.1 loot table).");
+        }
+
         lang = new GameLang(System.getenv().getOrDefault("IGELBINGO_LANGUAGE", "de_de"));
 
         performFirstStart();
@@ -146,10 +151,16 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         gameConfig.elytraReplenishInterval = config.getInt("elytra-replenish-interval", 8);
         gameConfig.elytraReplenishAmount = config.getInt("elytra-replenish-amount", 64);
         gameConfig.giveElytra = config.getBoolean("give-elytra", true);
+        gameConfig.modifiedLoottables = config.getBoolean("modified-loottables", true);
 
         String envGiveElytra = System.getenv("GIVE_ELYTRA");
         if (envGiveElytra != null) {
             gameConfig.giveElytra = !"false".equalsIgnoreCase(envGiveElytra);
+        }
+
+        String envModifiedLoottables = System.getenv("MODIFIED_LOOTTABLES");
+        if (envModifiedLoottables != null) {
+            gameConfig.modifiedLoottables = !"false".equalsIgnoreCase(envModifiedLoottables);
         }
     }
 

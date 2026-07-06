@@ -49,6 +49,17 @@ if [ -d "/opt/app-files/bac-datapack" ]; then
   echo "BAC datapack installed."
 fi
 
+# Install biome size datapack (smaller biomes + smoother terrain).
+# Disabled when SMALL_BIOMES=false (env: IGELBINGO_GAME_SMALL_BIOMES). Must be
+# present before the world is generated, hence installed here and not via plugin.
+if [ "${SMALL_BIOMES:-true}" != "false" ] && [ -d "/opt/app-files/biomesize-datapack" ]; then
+  mkdir -p /data/world/datapacks
+  cp -r /opt/app-files/biomesize-datapack /data/world/datapacks/biomesize
+  echo "Biome size datapack installed (smaller biomes)."
+else
+  echo "Biome size datapack disabled (vanilla worldgen)."
+fi
+
 # Download and filter BAC advancements at runtime
 if [ -x "/opt/app-files/bac-filter.sh" ]; then
   echo "Running BAC filter to download and install advancements..."
