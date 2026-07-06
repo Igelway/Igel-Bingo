@@ -22,14 +22,14 @@ download_with_checksum() {
   fi
 }
 
-# BingoReloaded (Paper) - v3.4.2
+# BingoReloaded (Paper) - v3.5.0 for Minecraft 26.1.2
 download_with_checksum \
-  "https://github.com/Steaf23/BingoReloaded/releases/download/v3.4.2/BingoReloaded-paper-3.4.2.jar" \
+  "https://github.com/Steaf23/BingoReloaded/releases/download/v3.5.0/BingoReloaded-paper-3.5.0-26.1.2.jar" \
   ""
 
 # PlaceholderAPI
 download_with_checksum \
-  "https://github.com/PlaceholderAPI/PlaceholderAPI/releases/download/2.12.2/PlaceholderAPI-2.12.2.jar" \
+  "https://github.com/PlaceholderAPI/PlaceholderAPI/releases/download/2.12.3/PlaceholderAPI-2.12.3.jar" \
   ""
 
 # LuckPerms for Bukkit
@@ -39,7 +39,7 @@ download_with_checksum \
 
 # PacketEvents
 download_with_checksum \
-  "https://github.com/retrooper/packetevents/releases/download/v2.12.2/packetevents-spigot-2.12.2.jar" \
+  "https://github.com/retrooper/packetevents/releases/download/v2.13.0/packetevents-spigot-2.13.0.jar" \
   ""
 
 # Chunky
