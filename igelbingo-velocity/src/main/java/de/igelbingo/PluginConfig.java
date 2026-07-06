@@ -26,7 +26,7 @@ public final class PluginConfig {
     public String gameDifficulty = "easy";
     public int gameViewDistance = 20;
     public int gameMaxPlayers = 500;
-    public boolean pullGameImage = true;
+    public String gameImagePullPolicy = "missing";  // always | missing | never (passed to docker run --pull)
 
     // Lobby
     public boolean lobbyAutoStart = true;
@@ -86,7 +86,7 @@ public final class PluginConfig {
             purpurBuild = getString(data, "purpur-build", purpurBuild);
             gameOps = getStringList(data, "game-ops", gameOps);
             gameMemory = getString(data, "game-memory", gameMemory);
-            pullGameImage = getBool(data, "pull-game-image", pullGameImage);
+            gameImagePullPolicy = parsePullPolicy(getString(data, "pull-game-image", gameImagePullPolicy), gameImagePullPolicy);
             lobbyAutoStart = getBool(data, "lobby-auto-start", lobbyAutoStart);
             lobbyStopOnGame = getBool(data, "lobby-stop-on-game", lobbyStopOnGame);
             lobbyIdleTimeout = getInt(data, "lobby-idle-timeout", lobbyIdleTimeout);
@@ -117,7 +117,7 @@ public final class PluginConfig {
         chunkyOwRadius = envInt("IGELBINGO_CHUNKY_OW_RADIUS", chunkyOwRadius);
         chunkyNetherRadius = envInt("IGELBINGO_CHUNKY_NETHER_RADIUS", chunkyNetherRadius);
         chunkyEndRadius = envInt("IGELBINGO_CHUNKY_END_RADIUS", chunkyEndRadius);
-        pullGameImage = envBool("IGELBINGO_PULL_GAME_IMAGE", pullGameImage);
+        gameImagePullPolicy = parsePullPolicy(System.getenv("IGELBINGO_PULL_GAME_IMAGE"), gameImagePullPolicy);
         if (System.getenv("GAME_DATA_DIR") != null) {
             gameDataDir = System.getenv("GAME_DATA_DIR");
         }
@@ -161,6 +161,18 @@ public final class PluginConfig {
     private String envString(String key, String def) {
         String val = System.getenv(key);
         return val != null ? val : def;
+    }
+
+    // Accepts docker pull policies (always|missing|never) plus legacy booleans
+    // (true -> always, false -> never); anything unknown falls back to def.
+    private String parsePullPolicy(String value, String def) {
+        if (value == null || value.isEmpty()) return def;
+        return switch (value.toLowerCase()) {
+            case "always", "true", "1" -> "always";
+            case "never", "false", "0" -> "never";
+            case "missing", "ifnotpresent", "if-not-present" -> "missing";
+            default -> def;
+        };
     }
 
     private boolean envBool(String key, boolean def) {

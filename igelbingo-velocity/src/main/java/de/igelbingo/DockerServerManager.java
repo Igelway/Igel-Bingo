@@ -46,10 +46,6 @@ public final class DockerServerManager {
 
         String image = config.gameserverImage;
 
-        if (config.pullGameImage) {
-            docker("pull", image);
-        }
-
         String forwardingSecret = "";
         try {
             forwardingSecret = new String(Files.readAllBytes(Path.of("/run/secrets/forwarding_secret")), StandardCharsets.UTF_8).trim();
@@ -58,6 +54,7 @@ public final class DockerServerManager {
 
         List<String> cmd = new ArrayList<>(List.of(
                 "run", "-d",
+                "--pull", config.gameImagePullPolicy,
                 "--name", GAME_CONTAINER_NAME,
                 "--network", NETWORK_NAME,
                 "--tmpfs", "/data:uid=1000,gid=1000",
