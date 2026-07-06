@@ -75,7 +75,7 @@ console server="velocity":
     docker attach --sig-proxy=false --detach-keys="ctrl-p,ctrl-q" igelbingo-{{server}}
 
 pull:
-    docker compose pull
+    docker compose pull --ignore-pull-failures
 
 ps:
     docker compose ps
