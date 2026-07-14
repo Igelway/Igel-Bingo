@@ -542,13 +542,12 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     }
 
     public void sendPluginMessage(String message) {
-        byte[] data = message.getBytes(java.nio.charset.StandardCharsets.UTF_8);
-        if (!getServer().getOnlinePlayers().isEmpty()) {
-            Player first = getServer().getOnlinePlayers().iterator().next();
-            first.sendPluginMessage(this, CHANNEL, data);
+        Player first = getServer().getOnlinePlayers().stream().findFirst().orElse(null);
+        if (first == null) {
+            pendingPluginMessages.add(message);
+            return;
         }
-        getServer().sendPluginMessage(this, CHANNEL, data);
-        pendingPluginMessages.add(message);
+        first.sendPluginMessage(this, CHANNEL, message.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 
     private void flushPendingPluginMessages(Player player) {
@@ -604,7 +603,6 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
                     chunkyRunning = false;
                     try { new java.io.File("/data/chunky_done").createNewFile(); } catch (Exception ignored) {}
                     sendPluginMessage("chunky_done");
-                    getServer().broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(lang.get("chunky-complete")));
                 }
             });
 
@@ -615,6 +613,7 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
             java.util.Map<String, Float> worldProgress = new java.util.concurrent.ConcurrentHashMap<>();
             int[] lastReportedPct = {0};
             onProgressMethod.invoke(chunky, (java.util.function.Consumer<Object>) event -> {
+                if (!chunkyRunning) return;
                 try {
                     String world = (String) progressWorldMethod.invoke(event);
                     // Chunky's progress() is already a percentage (0-100), not a fraction.
@@ -691,7 +690,6 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
             chunkyRunning = false;
             try { new java.io.File("/data/chunky_done").createNewFile(); } catch (Exception ignored) {}
             sendPluginMessage("chunky_done");
-            getServer().broadcast(LegacyComponentSerializer.legacyAmpersand().deserialize(lang.get("chunky-complete")));
         }
     }
 
