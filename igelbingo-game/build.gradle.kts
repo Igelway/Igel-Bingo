@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.igelbingo"
-version = "1.1.16"
+version = "1.1.17"
 
 java {
     toolchain {
