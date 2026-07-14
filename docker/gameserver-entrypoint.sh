@@ -80,8 +80,10 @@ configuration: SINGULAR
 defaultWorldName: minecraft:overworld
 language: de.yml
 savePlayerStatistics: true
-sendCommandAfterGameEnds: function bingo_setup:bingo_end/bingo_end
-sendCommandBeforeGameStarts: "igelbingo start"
+sendCommandAfterGameEnds:
+- "function bingo_setup:bingo_end/bingo_end"
+sendCommandBeforeGameStarts:
+- "igelbingo start"
 playerGamemodeAfterGame: NONE
 voteUsingCommandsOnly: false
 selectTeamsUsingCommandsOnly: false
@@ -214,13 +216,15 @@ SOUNDSEOF
 if [ -n "${RESOURCE_PACK}" ] && [ -z "${RESOURCE_PACK_SHA1:-}" ]; then
   echo "Computing resource pack SHA1 hash..."
   if command -v curl &>/dev/null; then
-    RESOURCE_PACK_SHA1=$(curl -sfL --max-time 30 "${RESOURCE_PACK}" | sha1sum | cut -d' ' -f1)
-    if [ -n "${RESOURCE_PACK_SHA1}" ]; then
+    pack_tmp="$(mktemp)"
+    if curl -sfL --max-time 60 "${RESOURCE_PACK}" -o "$pack_tmp" && [ -s "$pack_tmp" ]; then
+      RESOURCE_PACK_SHA1="$(sha1sum "$pack_tmp" | cut -d' ' -f1)"
       export RESOURCE_PACK_SHA1
       echo "Resource pack SHA1: ${RESOURCE_PACK_SHA1}"
     else
-      echo "WARNING: Failed to compute resource pack SHA1"
+      echo "WARNING: Failed to download resource pack; leaving SHA1 unset to avoid a wrong hash"
     fi
+    rm -f "$pack_tmp"
   else
     echo "WARNING: curl not found, cannot compute resource pack SHA1"
   fi
