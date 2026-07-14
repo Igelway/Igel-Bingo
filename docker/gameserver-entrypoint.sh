@@ -75,9 +75,9 @@ fi
 mkdir -p /data/plugins/BingoReloaded
 echo "Installing BingoReloaded config with IgelBingo hooks..."
 cat > /data/plugins/BingoReloaded/config.yml << 'CONFEOF'
-version: 3.5.0
+version: 3.5.1
 configuration: SINGULAR
-defaultWorldName: world
+defaultWorldName: minecraft:overworld
 language: de.yml
 savePlayerStatistics: true
 sendCommandAfterGameEnds: function bingo_setup:bingo_end/bingo_end
