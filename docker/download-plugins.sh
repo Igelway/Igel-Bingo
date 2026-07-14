@@ -22,9 +22,9 @@ download_with_checksum() {
   fi
 }
 
-# BingoReloaded (Paper) - v3.5.0 for Minecraft 26.1.2
+# BingoReloaded (Paper) - v3.5.1 for Minecraft 26.1.2
 download_with_checksum \
-  "https://github.com/Steaf23/BingoReloaded/releases/download/v3.5.0/BingoReloaded-paper-3.5.0-26.1.2.jar" \
+  "https://github.com/Steaf23/BingoReloaded/releases/download/v3.5.1/BingoReloaded-paper-3.5.1-26.1.2.jar" \
   ""
 
 # PlaceholderAPI
