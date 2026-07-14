@@ -8,6 +8,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public final class IgelBingoCommands implements SimpleCommand {
 
@@ -16,6 +17,7 @@ public final class IgelBingoCommands implements SimpleCommand {
     private final ProxyServer proxy;
     private final DockerServerManager docker;
     private final VelocityLang lang;
+    private final AtomicBoolean chunkyResultBroadcast = new AtomicBoolean(false);
 
     public IgelBingoCommands(IgelBingoPlugin plugin) {
         this.plugin = plugin;
@@ -92,12 +94,11 @@ public final class IgelBingoCommands implements SimpleCommand {
             if (config.lobbyStopOnGame) delayStopLobby();
 
             if (withChunky) {
-                broadcast(lang.prefixed("prepare.chunky-started"));
+                chunkyResultBroadcast.set(false);
+                broadcastAdmins(lang.prefixed("prepare.chunky-started"));
                 docker.waitForChunkyReady().thenAccept(chunkyDone -> {
-                    if (chunkyDone) {
-                        broadcast(lang.prefixed("prepare.chunky-done"));
-                    } else {
-                        broadcast(lang.prefixed("prepare.chunky-timeout"));
+                    if (chunkyResultBroadcast.compareAndSet(false, true)) {
+                        broadcastAdmins(lang.prefixed(chunkyDone ? "prepare.chunky-done" : "prepare.chunky-timeout"));
                     }
                 });
             }
@@ -132,12 +133,11 @@ public final class IgelBingoCommands implements SimpleCommand {
             broadcast(lang.prefixed("game.started"));
 
             if (withChunky) {
-                broadcast(lang.prefixed("prepare.chunky-started"));
+                chunkyResultBroadcast.set(false);
+                broadcastAdmins(lang.prefixed("prepare.chunky-started"));
                 docker.waitForChunkyReady().thenAccept(chunkyDone -> {
-                    if (chunkyDone) {
-                        broadcast(lang.prefixed("prepare.chunky-done"));
-                    } else {
-                        broadcast(lang.prefixed("prepare.chunky-timeout"));
+                    if (chunkyResultBroadcast.compareAndSet(false, true)) {
+                        broadcastAdmins(lang.prefixed(chunkyDone ? "prepare.chunky-done" : "prepare.chunky-timeout"));
                     }
                 });
             }
@@ -232,6 +232,14 @@ public final class IgelBingoCommands implements SimpleCommand {
     private void broadcast(String message) {
         Component component = deserialize(message);
         proxy.getAllPlayers().forEach(p -> p.sendMessage(component));
+        proxy.getConsoleCommandSource().sendMessage(component);
+    }
+
+    private void broadcastAdmins(String message) {
+        Component component = deserialize(message);
+        proxy.getAllPlayers().stream()
+                .filter(p -> p.hasPermission("igelbingo.admin"))
+                .forEach(p -> p.sendMessage(component));
         proxy.getConsoleCommandSource().sendMessage(component);
     }
 

@@ -195,7 +195,7 @@ public final class IgelBingoPlugin {
         } else if (message.startsWith("chunky_progress:")) {
             String pct = message.substring("chunky_progress:".length());
             logger.info("Chunky progress: " + pct + "%");
-            broadcast(lang.prefixed("prepare.chunky-running", "progress", pct));
+            broadcastAdmins(lang.prefixed("prepare.chunky-running", "progress", pct));
         }
     }
 
@@ -225,6 +225,16 @@ public final class IgelBingoPlugin {
                 .legacyAmpersand()
                 .deserialize(message);
         proxy.getAllPlayers().forEach(p -> p.sendMessage(component));
+        proxy.getConsoleCommandSource().sendMessage(component);
+    }
+
+    private void broadcastAdmins(String message) {
+        var component = net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
+                .legacyAmpersand()
+                .deserialize(message);
+        proxy.getAllPlayers().stream()
+                .filter(p -> p.hasPermission("igelbingo.admin"))
+                .forEach(p -> p.sendMessage(component));
         proxy.getConsoleCommandSource().sendMessage(component);
     }
 
