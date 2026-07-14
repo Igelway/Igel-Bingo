@@ -610,13 +610,20 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
 
             Class<?> progressEventClass = Class.forName("org.popcraft.chunky.api.event.task.GenerationProgressEvent");
             java.lang.reflect.Method onProgressMethod = chunkyApiClass.getMethod("onGenerationProgress", java.util.function.Consumer.class);
+            java.lang.reflect.Method progressMethod = progressEventClass.getMethod("progress");
+            java.lang.reflect.Method progressWorldMethod = progressEventClass.getMethod("world");
+            java.util.Map<String, Float> worldProgress = new java.util.concurrent.ConcurrentHashMap<>();
             int[] lastReportedPct = {0};
             onProgressMethod.invoke(chunky, (java.util.function.Consumer<Object>) event -> {
                 try {
-                    java.lang.reflect.Method progressMethod = progressEventClass.getMethod("progress");
+                    String world = (String) progressWorldMethod.invoke(event);
+                    // Chunky's progress() is already a percentage (0-100), not a fraction.
                     float progress = (float) progressMethod.invoke(event);
-                    int pct = Math.round(progress * 100);
-                    if (pct - lastReportedPct[0] >= 20 || pct >= 100) {
+                    worldProgress.put(world, progress);
+                    float sum = 0f;
+                    for (float p : worldProgress.values()) sum += p;
+                    int pct = Math.round(sum / Math.max(started[0], worldProgress.size()));
+                    if (pct - lastReportedPct[0] >= 25 || (pct >= 100 && lastReportedPct[0] < 100)) {
                         lastReportedPct[0] = pct;
                         sendPluginMessage("chunky_progress:" + pct);
                     }

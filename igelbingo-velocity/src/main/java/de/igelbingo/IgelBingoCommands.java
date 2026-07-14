@@ -92,7 +92,7 @@ public final class IgelBingoCommands implements SimpleCommand {
             if (config.lobbyStopOnGame) delayStopLobby();
 
             if (withChunky) {
-                broadcast(lang.prefixed("prepare.chunky-running", "progress", "0"));
+                broadcast(lang.prefixed("prepare.chunky-started"));
                 docker.waitForChunkyReady().thenAccept(chunkyDone -> {
                     if (chunkyDone) {
                         broadcast(lang.prefixed("prepare.chunky-done"));
@@ -132,7 +132,7 @@ public final class IgelBingoCommands implements SimpleCommand {
             broadcast(lang.prefixed("game.started"));
 
             if (withChunky) {
-                broadcast(lang.prefixed("prepare.chunky-running", "progress", "0"));
+                broadcast(lang.prefixed("prepare.chunky-started"));
                 docker.waitForChunkyReady().thenAccept(chunkyDone -> {
                     if (chunkyDone) {
                         broadcast(lang.prefixed("prepare.chunky-done"));
