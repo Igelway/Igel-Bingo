@@ -101,7 +101,7 @@ public final class DockerServerManager {
             cmd.add("-e");
             cmd.add("RESOURCE_PACK=" + resourcePack);
             cmd.add("-e");
-            cmd.add("REQUIRE_RESOURCE_PACK=true");
+            cmd.add("RESOURCE_PACK_ENFORCE=true");
             forwardedKeys.add("RESOURCE_PACK");
         }
 

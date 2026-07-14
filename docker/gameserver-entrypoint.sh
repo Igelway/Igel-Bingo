@@ -230,6 +230,16 @@ if [ -n "${RESOURCE_PACK}" ] && [ -z "${RESOURCE_PACK_SHA1:-}" ]; then
   fi
 fi
 
+# Derive a stable resource-pack-id (UUID) from the SHA1. Modern Minecraft clients
+# cache resource packs by this id; without a stable id the server sends a random
+# id on every join and the client re-downloads the pack each time.
+if [ -n "${RESOURCE_PACK_SHA1:-}" ] && [ -z "${RESOURCE_PACK_ID:-}" ]; then
+  h="${RESOURCE_PACK_SHA1}"
+  RESOURCE_PACK_ID="${h:0:8}-${h:8:4}-${h:12:4}-${h:16:4}-${h:20:12}"
+  export RESOURCE_PACK_ID
+  echo "Resource pack ID: ${RESOURCE_PACK_ID}"
+fi
+
 if [ "$(id -u)" -eq 0 ]; then
   chown -R minecraft:minecraft /data 2>/dev/null || true
 fi
