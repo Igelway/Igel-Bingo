@@ -100,7 +100,10 @@ public final class IgelBingoCommands implements SimpleCommand {
                     if (chunkyResultBroadcast.compareAndSet(false, true)) {
                         broadcastAdmins(lang.prefixed(chunkyDone ? "prepare.chunky-done" : "prepare.chunky-timeout"));
                     }
+                    docker.startGameIdleTimer(config.gameIdleTimeoutMinutes);
                 });
+            } else {
+                docker.startGameIdleTimer(config.gameIdleTimeoutMinutes);
             }
         });
     }
@@ -139,7 +142,10 @@ public final class IgelBingoCommands implements SimpleCommand {
                     if (chunkyResultBroadcast.compareAndSet(false, true)) {
                         broadcastAdmins(lang.prefixed(chunkyDone ? "prepare.chunky-done" : "prepare.chunky-timeout"));
                     }
+                    docker.startGameIdleTimer(config.gameIdleTimeoutMinutes);
                 });
+            } else {
+                docker.startGameIdleTimer(config.gameIdleTimeoutMinutes);
             }
         });
     }

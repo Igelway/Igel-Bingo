@@ -94,6 +94,7 @@ Key variables:
 - `IGELBINGO_GAME_MEMORY` — Game server RAM (default: 6G)
 - `IGELBINGO_LOBBY_IDLE_TIMEOUT` — Seconds of inactivity before lobby stops (0 = disabled)
 - `IGELBINGO_CHUNKY_PRELOAD` — Enable Chunky pre-generation
+- `IGELBINGO_GAME_IDLE_TIMEOUT` — Minutes before empty game server is auto-stopped (default: 120; set to 0 to never auto-stop, e.g. for long preloads)
 
 Environment variables prefixed with `IGELBINGO_GAME_` are forwarded as itzg container environment variables to the game server (the prefix is stripped). For example, `IGELBINGO_GAME_DIFFICULTY` becomes `DIFFICULTY`, `IGELBINGO_GAME_VIEW_DISTANCE` becomes `VIEW_DISTANCE`, etc.
 

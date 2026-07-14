@@ -42,6 +42,9 @@ public final class PluginConfig {
     public int chunkyNetherRadius = 2000;
     public int chunkyEndRadius = 2000;
 
+    // Game server idle timeout (minutes) — 0 = disabled
+    public int gameIdleTimeoutMinutes = 120;
+
     // Language
     public String language = "de_de";
 
@@ -117,6 +120,7 @@ public final class PluginConfig {
         chunkyOwRadius = envInt("IGELBINGO_CHUNKY_OW_RADIUS", chunkyOwRadius);
         chunkyNetherRadius = envInt("IGELBINGO_CHUNKY_NETHER_RADIUS", chunkyNetherRadius);
         chunkyEndRadius = envInt("IGELBINGO_CHUNKY_END_RADIUS", chunkyEndRadius);
+        gameIdleTimeoutMinutes = envInt("IGELBINGO_GAME_IDLE_TIMEOUT", gameIdleTimeoutMinutes);
         gameImagePullPolicy = parsePullPolicy(System.getenv("IGELBINGO_PULL_GAME_IMAGE"), gameImagePullPolicy);
         if (System.getenv("GAME_DATA_DIR") != null) {
             gameDataDir = System.getenv("GAME_DATA_DIR");

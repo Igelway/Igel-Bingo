@@ -27,6 +27,7 @@ public final class DockerServerManager {
     private String currentSeed;
     private volatile boolean chunkyAlreadyDone = false;
     private CompletableFuture<Boolean> chunkyReadyFuture;
+    private java.util.Timer idleTimer;
 
     public DockerServerManager(PluginConfig config, ProxyServer proxy, Logger logger) {
         this.config = config;
@@ -213,8 +214,32 @@ public final class DockerServerManager {
         }
     }
 
-    public void stopGameServer() {
-        docker("stop", "-t", "10", GAME_CONTAINER_NAME);
+    public void startGameIdleTimer(int timeoutMinutes) {
+        if (timeoutMinutes <= 0) return;
+        if (idleTimer != null) {
+            idleTimer.cancel();
+        }
+        idleTimer = new java.util.Timer("game-idle-timer", true);
+        long[] idleSeconds = {0};
+        idleTimer.scheduleAtFixedRate(new java.util.TimerTask() {
+            @Override
+            public void run() {
+                long playersOnGame = proxy.getAllPlayers().stream()
+                        .filter(p -> p.getCurrentServer().isPresent()
+                                && p.getCurrentServer().get().getServerInfo().getName().equals("game"))
+                        .count();
+                if (playersOnGame > 0) {
+                    idleSeconds[0] = 0;
+                    return;
+                }
+                idleSeconds[0] += 60;
+                if (idleSeconds[0] >= timeoutMinutes * 60L) {
+                    logger.info("Game server idle for " + (idleSeconds[0] / 60) + " min — stopping");
+                    idleTimer.cancel();
+                    stopGameServer();
+                }
+            }
+        }, 60000, 60000);
     }
 
     public void removeOldGameContainers() {
@@ -348,6 +373,10 @@ public final class DockerServerManager {
         } catch (Exception e) {
             throw new RuntimeException("Failed to execute: " + String.join(" ", command), e);
         }
+    }
+
+    public void stopGameServer() {
+        docker("stop", "-t", "10", GAME_CONTAINER_NAME);
     }
 
 }
