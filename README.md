@@ -53,29 +53,6 @@ Player → Velocity (25565) → Limbo   (always running)
 - **Igel-Bingo Game Plugin** (Paper): Countdown, starter kit (elytra + fireworks), game rules, world setup
 - **BingoReloaded**: Core game logic (cards, teams, voting) — connected via config hooks
 
-### Game State Machine
-
-```
-IDLE → STARTING → RUNNING
-IDLE → PREPARING → RUNNING
-RUNNING → (BingoReloaded hook: igelbingo end) → IDLE
-RUNNING → (/ib stop) → STOPPING → IDLE
-```
-
-If a player runs `/ib start` while a game is already `RUNNING`, they are simply routed to the game server.
-
-### Plugin Channel
-
-Velocity and game plugins communicate via the plugin message channel `igelbingo:main`:
-
-| Message | Direction | Trigger |
-|---|---|---|
-| `game_started` | Game → Velocity | Countdown complete, game running |
-| `game_ended` | Game → Velocity | BingoReloaded fires `igelbingo end` |
-| `chunky_done` | Game → Velocity | All Chunky pre-generation tasks finished |
-| `stop_game` | Velocity → Game | Manual stop from proxy |
-| `start_game` | Velocity → Game | Manual start from proxy |
-
 ### Lobby Idle Timer
 
 When the last player leaves the lobby and no game is running, a timer starts (`IGELBINGO_LOBBY_IDLE_TIMEOUT` seconds, default 300). On expiry, `docker stop igelbingo-lobby` is called and all players are routed back to limbo. The timer is cancelled when a new player joins the lobby. Set to `0` to disable.
@@ -127,13 +104,6 @@ IGELBINGO_VELOCITY_IMAGE=igel-bingo-velocity:local \
 IGELBINGO_GAMESERVER_IMAGE=igel-bingo-gameserver:local \
 just up
 ```
-
-## CI/CD
-
-Pushing a tag (e.g. `v1.0.0`) triggers GitHub Actions (`.github/workflows/build-and-release.yml`):
-1. Build both plugins (Gradle)
-2. Build and push Docker images to `ghcr.io`
-3. Create a GitHub Release with the plugin JARs
 
 ## License
 
