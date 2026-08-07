@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     compileOnly("io.papermc.paper:paper-api:26.1.2.build.69-stable")
-    compileOnly("com.github.retrooper:packetevents-spigot:2.12.2")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.13.0")
     implementation("org.yaml:snakeyaml:2.4")
 }
 

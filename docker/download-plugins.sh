@@ -34,7 +34,7 @@ download_with_checksum \
 
 # LuckPerms for Bukkit
 download_with_checksum \
-  "https://cdn.modrinth.com/data/Vebnzrzj/versions/MBSY8toc/LuckPerms-Bukkit-5.5.53.jar" \
+  "https://cdn.modrinth.com/data/Vebnzrzj/versions/b0mk8uS6/LuckPerms-Bukkit-5.5.71.jar" \
   ""
 
 # PacketEvents
