@@ -75,15 +75,23 @@ fi
 mkdir -p /data/plugins/BingoReloaded
 echo "Installing BingoReloaded config with IgelBingo hooks..."
 cat > /data/plugins/BingoReloaded/config.yml << 'CONFEOF'
-version: 3.5.2
+version: 3.6.0
 configuration: SINGULAR
 defaultWorldName: minecraft:overworld
 language: de.yml
 savePlayerStatistics: true
+leaderboard:
+  enabled: true
+  saveCancelledGames: false
+  onlyUsePresetCategories: false
 sendCommandAfterGameEnds:
 - "function bingo_setup:bingo_end/bingo_end"
 sendCommandBeforeGameStarts:
 - "igelbingo start"
+sendCommandAfterGameEndsPerPlayer:
+  everyPlayer: []
+  winningPlayers: []
+  losingPlayers: []
 playerGamemodeAfterGame: NONE
 voteUsingCommandsOnly: false
 selectTeamsUsingCommandsOnly: false
@@ -100,6 +108,7 @@ playerWaitTime: 50
 gameRestartTime: 30
 useVoteSystem: false
 preventPlayerGriefing: false
+disableTeamPrefix: false
 startingCountdownTime: 30
 teleportMaxDistance: 0
 playerTeleportStrategy: NONE
@@ -112,8 +121,11 @@ keepScoreboardVisible: true
 showPlayerInScoreboard: true
 disableAdvancements: false
 disableStatistics: false
+disableNether: false
+disableTheEnd: false
 endGameWithoutTeams: false
 allowViewingAllCards: true
+disableCardMenuFromItem: false
 savePlayerInformation: false
 loadPlayerInformationStrategy: AFTER_LEAVING_WORLD
 teleportToLobbyAfterGame:
@@ -141,6 +153,12 @@ voteList:
   cardsizes:
   - '3'
   - '5'
+teamPouch:
+  slots: 18
+endlessPearl:
+  cooldown: 5.0
+teamTeleporter:
+  cooldown: 5.0
 hotswapMode:
   minimumExpirationTime: 5
   maximumExpirationTime: 30
@@ -151,6 +169,18 @@ GoUpWand:
   downDistance: 25
   cooldown: 2.0
   platformLifetime: 10
+teleportGrid:
+  cellSize:
+    x: 500
+    z: 500
+  sendCommandWhenGridFinished: ""
+  center:
+    x: 0
+    z: 0
+  size:
+    x: 50
+    z: 50
+  skipOceanBiomes: true
 defaultWorlds:
 - bingo_world
 clearDefaultWorlds: true

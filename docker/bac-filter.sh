@@ -3,6 +3,7 @@ set -e
 
 # Download and filter BlazeandCave's Advancements Pack from Modrinth.
 # Downloaded at runtime (not bundled) for license compliance.
+# BAC 1.21 is the latest release for Minecraft 26.2 (1.21.1 targets 26.3).
 
 BAC_DATAPACK_DIR="${1:-/data/world/datapacks/BAC_Filtered}"
 WORK_DIR="/tmp/bac-filter-$$"

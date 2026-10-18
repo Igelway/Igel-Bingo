@@ -14,12 +14,14 @@ echo "=== Releasing Igel-Bingo v$VERSION ==="
 sed -i "s/^version = \".*\"/version = \"$VERSION\"/" igelbingo-velocity/build.gradle.kts
 sed -i "s/^version = \".*\"/version = \"$VERSION\"/" igelbingo-game/build.gradle.kts
 sed -i 's/"version": "[^"]*"/"version": "'"$VERSION"'"/' igelbingo-velocity/src/main/resources/velocity-plugin.json
+sed -i "s/        version = \".*\"/        version = \"$VERSION\"/" igelbingo-velocity/src/main/java/de/igelbingo/IgelBingoPlugin.java
 sed -i "s/^version: .*/version: $VERSION/" igelbingo-game/src/main/resources/plugin.yml
 
 git add \
     igelbingo-velocity/build.gradle.kts \
     igelbingo-game/build.gradle.kts \
     igelbingo-velocity/src/main/resources/velocity-plugin.json \
+    igelbingo-velocity/src/main/java/de/igelbingo/IgelBingoPlugin.java \
     igelbingo-game/src/main/resources/plugin.yml
 
 git commit -m "chore: bump version to $VERSION" || true
