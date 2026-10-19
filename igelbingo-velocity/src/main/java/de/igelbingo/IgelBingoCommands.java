@@ -79,7 +79,13 @@ public final class IgelBingoCommands implements SimpleCommand {
 
         boolean withChunky = config.chunkyPreload && !clean;
 
-        docker.createGameServer(withChunky);
+        try {
+            docker.createGameServer(withChunky);
+        } catch (RuntimeException e) {
+            broadcast(lang.prefixed("game.start-failed"));
+            plugin.setState(GameState.IDLE);
+            return;
+        }
 
         docker.waitForServerReady().thenAccept(ready -> {
             if (!ready) {
@@ -123,7 +129,13 @@ public final class IgelBingoCommands implements SimpleCommand {
         }
 
         broadcast(lang.prefixed(withChunky ? "prepare.starting" : "game.starting"));
-        docker.createGameServer(withChunky);
+        try {
+            docker.createGameServer(withChunky);
+        } catch (RuntimeException e) {
+            broadcast(lang.prefixed(withChunky ? "prepare.start-failed" : "game.start-failed"));
+            plugin.setState(GameState.IDLE);
+            return;
+        }
 
         docker.waitForServerReady().thenAccept(ready -> {
             if (!ready) {

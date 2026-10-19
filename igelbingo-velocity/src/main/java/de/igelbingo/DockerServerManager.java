@@ -122,7 +122,11 @@ public final class DockerServerManager {
 
         cmd.add(image);
 
-        docker(cmd.toArray(new String[0]));
+        String output = docker(cmd.toArray(new String[0]));
+        if (docker("ps", "-aqf", "name=" + GAME_CONTAINER_NAME).trim().isEmpty()) {
+            logger.severe("Failed to create game container: " + output.trim());
+            throw new IllegalStateException("Failed to create game container");
+        }
 
         logger.info("Game container created and started (seed: " + seed + ")");
     }
@@ -366,7 +370,8 @@ public final class DockerServerManager {
 
             int exitCode = process.waitFor();
             if (exitCode != 0 && command.size() > 1 && !"inspect".equals(command.get(1)) && !"exec".equals(command.get(1))) {
-                logger.warning("Command exited with " + exitCode + ": " + String.join(" ", command));
+                String logCommand = String.join(" ", command).replaceAll("VELOCITY_SECRET=[^ ]+", "VELOCITY_SECRET=***");
+                logger.warning("Command exited with " + exitCode + ": " + logCommand);
             }
 
             return output.toString();
