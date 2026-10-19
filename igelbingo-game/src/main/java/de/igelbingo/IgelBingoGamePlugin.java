@@ -246,8 +246,6 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
     public void startPreGameSequence() {
         if (phase != GamePhase.IDLE) return;
 
-        cancelChunkyTasks();
-
         phase = GamePhase.COUNTDOWN;
         countdownRemaining = gameConfig.countdownSeconds;
 
@@ -264,6 +262,10 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
         countdownTask = new BukkitRunnable() {
             @Override
             public void run() {
+                // Let Chunky keep generating during the countdown, then stop it
+                // right before the game actually starts.
+                cancelChunkyTasks();
+
                 phase = GamePhase.RUNNING;
                 countdownTask = null;
 
@@ -287,6 +289,8 @@ public final class IgelBingoGamePlugin extends JavaPlugin implements PluginMessa
             countdownTask.cancel();
             countdownTask = null;
         }
+
+        cancelChunkyTasks();
 
         getServer().dispatchCommand(getServer().getConsoleSender(),
                 "function bingo_setup:bingo_start/abort_countdown/revert_countdown");
