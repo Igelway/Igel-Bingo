@@ -13,9 +13,9 @@ WORKDIR /data
 
 RUN mkdir -p /opt/app-files/plugins
 
-# Download Velocity 4.1.0-SNAPSHOT
+# Download Velocity 4.3.0
 RUN curl -o /opt/app-files/velocity.jar -L \
-    "https://fill-data.papermc.io/v1/objects/aebade8be3b15d7c3c61514a50ce857cbf78ee87bd32e8d16d2352c6ca3e472f/velocity-4.1.0-SNAPSHOT-16.jar"
+    "https://fill-data.papermc.io/v1/objects/85be73b90f295acd8d5d45a00ad10bac791d4b72b7554172612a89565ebaaa8f/velocity-4.3.0-44.jar"
 
 # Download LuckPerms for Velocity
 RUN curl -o /opt/app-files/plugins/LuckPerms-Velocity.jar -L \

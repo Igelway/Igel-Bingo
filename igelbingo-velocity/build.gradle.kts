@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.igelbingo"
-version = "1.1.21"
+version = "1.1.22"
 
 java {
     toolchain {
@@ -18,8 +18,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("com.velocitypowered:velocity-api:4.1.0-SNAPSHOT")
-    annotationProcessor("com.velocitypowered:velocity-api:4.1.0-SNAPSHOT")
+    compileOnly("com.velocitypowered:velocity-api:4.3.0")
+    annotationProcessor("com.velocitypowered:velocity-api:4.3.0")
     compileOnly("com.google.inject:guice:7.0.0")
     compileOnly("net.luckperms:api:5.4")
 

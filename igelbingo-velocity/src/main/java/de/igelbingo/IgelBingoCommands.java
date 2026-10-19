@@ -262,8 +262,11 @@ public final class IgelBingoCommands implements SimpleCommand {
     }
 
     private void delayStopLobby() {
+        // Give clients time to finish the backend switch (configuration phase and
+        // resource-pack reload) before the lobby disconnects. Stopping it too early
+        // can race with the game server's registry sync.
         proxy.getScheduler().buildTask(plugin, docker::stopLobby)
-                .delay(5, TimeUnit.SECONDS).schedule();
+                .delay(30, TimeUnit.SECONDS).schedule();
     }
 
     @Override

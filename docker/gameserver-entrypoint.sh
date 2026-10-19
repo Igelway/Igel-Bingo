@@ -184,7 +184,7 @@ teleportGrid:
 defaultWorlds:
 - bingo_world
 clearDefaultWorlds: true
-customWorldGeneration: ''
+customWorldGeneration: 'null'
 CONFEOF
 
 echo "Installing BingoReloaded sounds..."
