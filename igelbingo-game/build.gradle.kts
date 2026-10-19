@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "de.igelbingo"
-version = "1.1.23"
+version = "1.1.24"
 
 java {
     toolchain {
@@ -20,8 +20,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly("io.papermc.paper:paper-api:26.2.build.134-stable")
-    compileOnly("com.github.retrooper:packetevents-spigot:2.13.0")
+    compileOnly("io.papermc.paper:paper-api:26.3.build.205-stable")
+    compileOnly("com.github.retrooper:packetevents-spigot:2.14.0")
     implementation("org.yaml:snakeyaml:2.4")
 }
 

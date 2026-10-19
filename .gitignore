@@ -26,6 +26,7 @@ data/
 
 # Datapack content (not Docker runtime data)
 !docker/bingo-datapack/data/
+!docker/biomesize-datapack/data/
 !docker/game-data/
 
 # Secrets

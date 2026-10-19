@@ -22,10 +22,10 @@ download_with_checksum() {
   fi
 }
 
-# BingoReloaded (Paper) - v3.6.0 for Minecraft 26.2
+# BingoReloaded (Paper) - v3.6.0 for Minecraft 26.3
 download_with_checksum \
-  "https://github.com/Steaf23/BingoReloaded/releases/download/v3.6.0/BingoReloaded-paper-3.6.0-26.2.jar" \
-  "a26e472729edbe5aab7ddd3de6d74e180840d5f01c8873098a9b8917863fe150"
+  "https://github.com/Steaf23/BingoReloaded/releases/download/v3.6.0/BingoReloaded-paper-3.6.0-26.3.jar" \
+  "cee89cbb75cdfecb7a42d8a15dd3f72d3f8e3179ecebc3b36171b5898a5e7f0b"
 
 # PlaceholderAPI
 download_with_checksum \
@@ -39,8 +39,8 @@ download_with_checksum \
 
 # PacketEvents
 download_with_checksum \
-  "https://github.com/retrooper/packetevents/releases/download/v2.13.0/packetevents-spigot-2.13.0.jar" \
-  ""
+  "https://github.com/retrooper/packetevents/releases/download/v2.14.0/packetevents-spigot-2.14.0.jar" \
+  "060087c58ec268eae7dd0eb1f17ac3bea1eaadda1693414141ff64e506091bd7"
 
 # Chunky
 download_with_checksum \
