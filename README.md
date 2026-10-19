@@ -90,6 +90,12 @@ gameRestartTime: -1
 
 BingoReloaded calls `igelbingo start` (game plugin) before the game begins and `igelbingo end` when a team wins. `gameRestartTime: -1` disables automatic restarts — restart is controlled by the Velocity plugin instead.
 
+## Xaero's World Map
+
+[Xaero's maps merge different worlds](https://github.com/turikhay/MapModCompanion) that share the same server address unless the server sends a world identifier. The old Xaero server plugin is not needed for this; [MapModCompanion](https://github.com/turikhay/MapModCompanion) implements the identifier on Velocity and on every backend (lobby, game).
+
+Players set **Map Selection** to **Server** once in Xaero's World Map (bottom-left menu). Existing maps can be re-bound to the new world IDs by selecting the old map and confirming.
+
 ## Deployment
 
 Pre-built images are published to `ghcr.io` and used by default — no extra configuration needed.

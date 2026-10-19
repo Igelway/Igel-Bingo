@@ -48,4 +48,9 @@ download_with_checksum \
   "" \
   "Chunky-Bukkit-1.5.3.jar"
 
+# MapModCompanion (separates Xaero's maps per world)
+download_with_checksum \
+  "https://github.com/turikhay/MapModCompanion/releases/download/v0.11.0-beta.2/MapModCompanion.jar" \
+  "4af733839b51b8ad1c34d7d742ca2640f97e58b50c35993e73123be863bf5aff"
+
 echo "All plugins downloaded."

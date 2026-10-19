@@ -21,6 +21,11 @@ RUN curl -o /opt/app-files/velocity.jar -L \
 RUN curl -o /opt/app-files/plugins/LuckPerms-Velocity.jar -L \
     "https://cdn.modrinth.com/data/Vebnzrzj/versions/tamnmXad/LuckPerms-Velocity-5.5.71.jar"
 
+# Download MapModCompanion (separates Xaero's maps per world)
+RUN curl -fSL -o /opt/app-files/plugins/MapModCompanion.jar \
+    "https://github.com/turikhay/MapModCompanion/releases/download/v0.11.0-beta.2/MapModCompanion.jar" && \
+    echo "4af733839b51b8ad1c34d7d742ca2640f97e58b50c35993e73123be863bf5aff  /opt/app-files/plugins/MapModCompanion.jar" | sha256sum -c -
+
 # Copy IgelBingo Velocity Plugin
 COPY igelbingo-velocity/build/libs/igelbingo-velocity-*.jar /opt/app-files/plugins/
 
