@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 @Plugin(
         id = "igelbingo",
         name = "IgelBingo",
-        version = "1.1.25",
+        version = "1.1.26",
         description = "Docker-based Bingo game management for Velocity",
         authors = {"Igelway"}
 )
